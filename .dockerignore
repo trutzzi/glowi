@@ -1,0 +1,16 @@
+# Keep the build context small and secret-free.
+.git
+.next
+node_modules
+generated
+.env*
+!.env.production.example
+*.log
+marketing
+docs
+.github
+.vscode
+.DS_Store
+next copy.config.ts
+package copy.json
+tsconfig copy.json

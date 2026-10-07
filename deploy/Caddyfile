@@ -1,0 +1,12 @@
+# HTTPS certificates are requested and renewed automatically for $DOMAIN.
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:3000 {
+		# Send streamed pages (Suspense) immediately instead of buffering them.
+		flush_interval -1
+	}
+}

@@ -1,0 +1,5 @@
+# m h dom mon dow  (Europe/Bucharest)
+# Hourly: the app decides what is due (reminders from 10:00, maintenance, at most once each).
+5 * * * * /usr/local/bin/reminders.sh
+# Daily at 03:30: database backup.
+30 3 * * * /usr/local/bin/backup.sh

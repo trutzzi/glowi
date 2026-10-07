@@ -1,0 +1,109 @@
+# Azure DevOps pipeline for the GitHub repository.
+#   Check:  every push and pull request — install, migrate a throwaway database,
+#           lint, type-check, build.
+#   Deploy: pushes to main — SSH to the server, which migrates, builds and restarts
+#           (deploy/deploy.sh). The build has to run there: it reads the real database.
+#
+# Setup (once, see docs/DEPLOY.md "Azure Pipelines"):
+#   Library → variable group "glowi-production": SSH_HOST, SSH_USER, SSH_KNOWN_HOSTS,
+#           SSH_PUBLIC_KEY, optional SSH_PORT and APP_DIR
+#   Library → secure file "glowi_deploy_key": the private SSH key
+#   Environments → "production" (add approvals there if you want a manual OK)
+
+trigger:
+  branches:
+    include: [main]
+
+pr:
+  branches:
+    include: ["*"]
+
+variables:
+  NODE_VERSION: "22.x"
+  npm_config_cache: $(Pipeline.Workspace)/.npm
+
+stages:
+  - stage: Check
+    jobs:
+      - job: Check
+        pool:
+          vmImage: ubuntu-latest
+        timeoutInMinutes: 20
+        services:
+          postgres: postgres
+        variables:
+          # Throwaway values for CI only; the real ones live on the server.
+          DATABASE_URL: postgresql://glowi:glowi@localhost:5432/glowi
+          SESSION_SECRET: ci-only-session-secret-not-used-anywhere
+          SMSLINK_TEST: "1"
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: $(NODE_VERSION)
+            displayName: Node.js $(NODE_VERSION)
+          - task: Cache@2
+            inputs:
+              key: 'npm | "$(Agent.OS)" | package-lock.json'
+              restoreKeys: 'npm | "$(Agent.OS)"'
+              path: $(npm_config_cache)
+            displayName: Cache npm
+          - script: npm ci
+            displayName: Install
+          - script: |
+              for i in $(seq 1 30); do pg_isready -h localhost -p 5432 -U glowi && break; sleep 2; done
+            displayName: Wait for Postgres
+          - script: |
+              npx prisma generate
+              npx prisma migrate deploy
+              npx prisma db seed
+            displayName: Database (migrate + seed)
+          - script: npm run lint
+            displayName: Lint
+          - script: npx tsc --noEmit
+            displayName: Types
+          - script: npm run build
+            displayName: Build
+
+  - stage: Deploy
+    dependsOn: Check
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['Build.Reason'], 'PullRequest'))
+    variables:
+      # Defaults; the variable group may override them.
+      - name: SSH_PORT
+        value: "22"
+      - name: APP_DIR
+        value: /opt/glowi
+      - group: glowi-production
+    jobs:
+      - deployment: Deploy
+        environment: production
+        pool:
+          vmImage: ubuntu-latest
+        timeoutInMinutes: 30
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: none # the server pulls the code itself
+                - task: InstallSSHKey@0
+                  inputs:
+                    knownHostsEntry: $(SSH_KNOWN_HOSTS)
+                    sshPublicKey: $(SSH_PUBLIC_KEY)
+                    sshKeySecureFile: glowi_deploy_key
+                  displayName: SSH key
+                - script: |
+                    set -euo pipefail
+                    ssh -p "$(SSH_PORT)" "$(SSH_USER)@$(SSH_HOST)" \
+                      "cd '$(APP_DIR)' && ./deploy/deploy.sh '$(Build.SourceVersion)'"
+                  displayName: Deploy on the server
+
+resources:
+  containers:
+    - container: postgres
+      image: postgres:16-alpine
+      ports:
+        - 5432:5432
+      env:
+        POSTGRES_USER: glowi
+        POSTGRES_PASSWORD: glowi
+        POSTGRES_DB: glowi

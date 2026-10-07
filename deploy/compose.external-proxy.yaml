@@ -1,0 +1,15 @@
+# Added by deploy.sh when PROXY_NETWORK is set: puts the app on the Docker
+# network of the server's existing reverse proxy (e.g. a Caddy container), where
+# it is reachable as "glowi-app:3000". See deploy/Caddyfile.snippet.
+services:
+  app:
+    networks:
+      default:
+      proxy:
+        aliases:
+          - glowi-app
+
+networks:
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK}

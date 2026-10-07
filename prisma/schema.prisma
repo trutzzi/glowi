@@ -1,0 +1,204 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CLIENT
+  ADMIN
+}
+
+// What happened with an appointment. SCHEDULED is the only status for a future visit;
+// the other four are what the admin records afterwards.
+enum AppointmentStatus {
+  SCHEDULED
+  HONORED
+  MISSED_ANNOUNCED // client cancelled in good time
+  MISSED_SHORT_NOTICE // client cancelled, but too late
+  NOT_HONORED // no-show, nothing announced
+}
+
+model User {
+  id                    String               @id @default(cuid())
+  email                 String?              @unique // optional for clients, who log in with their phone; required in practice for the admin
+  name                  String
+  phone                 String?
+  passwordHash          String
+  role                  Role                 @default(CLIENT)
+  birthday              DateTime?            @db.Date
+  allergies             String? // allergies and sensitivities: skincare, colour, lashes
+  privateNotes          String? // admin-only: preferences, colour formulas ("7.1 + 20 vol, 35 min")
+  // GDPR: marketing consent is per channel and must be opt-in, so both default to false.
+  // Appointment reminders are service messages, not marketing, and don't depend on these.
+  smsMarketingConsent   Boolean              @default(false)
+  emailMarketingConsent Boolean              @default(false)
+  consentUpdatedAt      DateTime? // when either consent last changed, as proof
+  createdAt             DateTime             @default(now())
+  appointments          Appointment[]
+  maintenances          Maintenance[]
+  appointmentRequests   AppointmentRequest[]
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  sortOrder Int       @default(0)
+  services  Service[]
+}
+
+model Service {
+  id               String        @id @default(cuid())
+  slug             String        @unique
+  title            String
+  description      String
+  image            ServiceImage?
+  category         Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId       String?
+  durationMin      Int           @default(60)
+  bufferMin        Int           @default(0) // cleanup time after the visit; the slot stays booked
+  maintenanceWeeks Int? // how often clients should come back; null = no maintenance for this service
+  price            Decimal       @default(0) @db.Decimal(10, 2) // current list price, RON
+  active           Boolean       @default(true) // hide instead of delete, so history keeps its service
+  appointments     Appointment[]
+  maintenances     Maintenance[]
+}
+
+model Appointment {
+  id              String               @id @default(cuid())
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  service         Service              @relation(fields: [serviceId], references: [id])
+  serviceId       String
+  appointmentDate DateTime // date and start time of the visit
+  // appointmentDate + service duration + buffer, stored at booking so the
+  // database can reject overlapping bookings across the salon (see the no-double-booking
+  // constraint in the migration SQL).
+  endsAt          DateTime
+  // Price agreed at booking, copied from Service.price so later price changes
+  // don't rewrite history.
+  price           Decimal              @db.Decimal(10, 2)
+  status          AppointmentStatus    @default(SCHEDULED)
+  lateMinutes     Int? // HONORED but the client arrived late (5/10/15/30)
+  notes           String?
+  reminderSentAt  DateTime? // set once the reminder has gone out, so it is sent only once
+  requests        AppointmentRequest[]
+  createdAt       DateTime             @default(now())
+
+  @@index([userId, appointmentDate])
+  @@index([status, reminderSentAt, appointmentDate])
+}
+
+// Maintenance: a client asked to be reminded to come back for a service.
+// Started or renewed when a visit for that service is marked HONORED; the SMS
+// goes out once per cycle at 10:00 on dueDate (lib/reminders.ts).
+model Maintenance {
+  id             String    @id @default(cuid())
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  service        Service   @relation(fields: [serviceId], references: [id])
+  serviceId      String
+  intervalWeeks  Int // copied from the service, can be changed for this client
+  lastVisitAt    DateTime // the honored visit that started this cycle
+  dueDate        DateTime  @db.Date // salon-local day the reminder SMS goes out
+  active         Boolean   @default(true) // false = stopped by the admin
+  clientDeclined Boolean   @default(false) // the client turned it off; only the client can turn it back on
+  smsSentAt      DateTime? // reminder for the current cycle already sent
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([userId, serviceId])
+  @@index([active, clientDeclined, smsSentAt, dueDate])
+}
+
+// The service's picture, uploaded by the admin. Kept in its own table so service
+// lists never load the image bytes; served by app/service-images/[id]/[v]/route.ts.
+model ServiceImage {
+  serviceId String   @id
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  data      Bytes
+  mimeType  String
+  updatedAt DateTime @updatedAt
+}
+
+// Errors and warnings recorded by lib/logger.ts, shown to the admin at /admin/logs.
+// Kept for 30 days.
+model ErrorLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  level     String // "error" | "warn"
+  source    String // "server" | "client" | "sms"
+  message   String
+  digest    String? // Next.js error id, matches the id shown on the error screen
+  path      String?
+  method    String?
+  routeType String? // render | route | action | proxy
+  stack     String?
+
+  @@index([createdAt])
+}
+
+// Small app-wide settings edited by the admin, e.g. the client announcement
+// ("clientAnnouncement") and whether the admin guide is hidden ("adminGuideHidden").
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+enum RequestType {
+  CANCEL
+  RESCHEDULE
+}
+
+// PENDING -> APPROVED -> COMPLETED for a reschedule (the client picks the new time
+// after approval); PENDING -> COMPLETED for an approved cancellation;
+// PENDING -> REJECTED; PENDING/APPROVED -> WITHDRAWN when the client takes it back
+// or the admin changes the appointment directly.
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+  WITHDRAWN
+}
+
+// A client asking to cancel or move an appointment. At most one open request
+// (PENDING or APPROVED) per appointment: enforced by a partial unique index in
+// the migration SQL.
+model AppointmentRequest {
+  id            String        @id @default(cuid())
+  appointment   Appointment   @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  appointmentId String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String
+  type          RequestType
+  status        RequestStatus @default(PENDING)
+  message       String? // from the client
+  adminNote     String? // shown to the client when rejected
+  createdAt     DateTime      @default(now())
+  decidedAt     DateTime?
+  completedAt   DateTime?
+
+  @@index([status, createdAt])
+  @@index([appointmentId])
+}
+
+// Time the salon is closed for appointments (admin and clients), e.g. a wedding.
+// All-day events run from salon midnight of the first day to salon midnight after
+// the last day; stored as UTC instants like appointments.
+model CalendarEvent {
+  id        String   @id @default(cuid())
+  title     String
+  startsAt  DateTime
+  endsAt    DateTime
+  allDay    Boolean  @default(true)
+  notes     String?
+  createdAt DateTime @default(now())
+
+  @@index([startsAt, endsAt])
+}

@@ -1,0 +1,11 @@
+# Add this site to the Caddyfile of the Caddy that already runs on the server,
+# then reload it (e.g. docker exec <caddy-container> caddy reload --config /etc/caddy/Caddyfile).
+# Replace the domain. The app is reachable on the shared Docker network as glowi-app:3000.
+
+glowi.valentintruta.ro {
+	encode zstd gzip
+	reverse_proxy glowi-app:3000 {
+		# Send streamed pages (Suspense) immediately instead of buffering them.
+		flush_interval -1
+	}
+}

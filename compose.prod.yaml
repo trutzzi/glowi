@@ -1,0 +1,117 @@
+# Production stack on one server. Run through deploy/deploy.sh, which loads .env.
+#   db      Postgres 16 (data in the pgdata volume)
+#   app     the Next.js server
+#   cron    hourly SMS job + daily database backup
+#   caddy   HTTPS + reverse proxy, only on a server without one (COMPOSE_PROFILES=caddy)
+#   migrate one-off: prisma migrate deploy / seed (profile "tools")
+# On a server that already runs a reverse proxy in Docker, set PROXY_NETWORK and
+# deploy.sh adds deploy/compose.external-proxy.yaml so that proxy can reach the app.
+name: glowi
+
+x-database-url: &database-url postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Only on the server's loopback: the image build reads the database from the host.
+    ports:
+      - "127.0.0.1:${DB_HOST_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    build:
+      context: .
+      target: migrator
+    image: glowi-migrate:latest
+    profiles: ["tools"]
+    environment:
+      DATABASE_URL: *database-url
+      NODE_ENV: production
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      target: runner
+      network: host # the build prerenders pages from the database at 127.0.0.1:5432
+      secrets:
+        - database_url
+    image: glowi-app:latest
+    restart: unless-stopped
+    init: true # forwards SIGTERM so Next.js can finish requests and after() work
+    stop_grace_period: 30s
+    env_file: .env
+    environment:
+      DATABASE_URL: *database-url
+      NODE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+    # Loopback only, for the deploy health check; the internet goes through the proxy.
+    ports:
+      - "127.0.0.1:${APP_HOST_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      start_period: 20s
+      retries: 5
+
+  caddy:
+    image: caddy:2-alpine
+    profiles: ["caddy"] # skip when the server already has a reverse proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+  cron:
+    build: ./deploy/cron
+    image: glowi-cron:latest
+    restart: unless-stopped
+    environment:
+      CRON_SECRET: ${CRON_SECRET}
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+    volumes:
+      - backups:/backups
+    depends_on:
+      - app
+
+secrets:
+  database_url:
+    environment: BUILD_DATABASE_URL # set by deploy/deploy.sh
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
+  backups:

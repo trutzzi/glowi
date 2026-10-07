@@ -18,12 +18,13 @@ COPY prisma ./prisma
 COPY prisma.config.ts tsconfig.json ./
 # The demo seed imports these helpers.
 COPY lib/time.ts lib/dates.ts ./lib/
-RUN npx prisma generate
+# prisma.config.ts requires DATABASE_URL; generate never connects, so a placeholder will do.
+RUN DATABASE_URL=postgresql://placeholder@localhost/placeholder npx prisma generate
 CMD ["npx", "prisma", "migrate", "deploy"]
 
 FROM deps AS builder
 COPY . .
-RUN npx prisma generate
+RUN DATABASE_URL=postgresql://placeholder@localhost/placeholder npx prisma generate
 RUN --mount=type=secret,id=database_url,required=true \
     DATABASE_URL="$(cat /run/secrets/database_url)" npm run build
 

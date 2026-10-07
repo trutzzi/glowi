@@ -1,0 +1,93 @@
+# Check: every push and pull request — install, migrate a throwaway database,
+#        lint, type-check, build.
+# Deploy: pushes to main — SSH to the server, which migrates, builds and restarts
+#         (deploy/deploy.sh). The build has to run there: it reads the real database.
+#
+# Setup (once, see docs/DEPLOY.md "GitHub Actions"): repository → Settings →
+# Environments → "production" with these secrets:
+#   SSH_HOST, SSH_USER, SSH_PRIVATE_KEY, SSH_KNOWN_HOSTS, ENV_FILE (the server's .env)
+# and optional variables SSH_PORT (default 22) and APP_DIR (default /opt/glowi).
+name: Check and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: glowi
+          POSTGRES_PASSWORD: glowi
+          POSTGRES_DB: glowi
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U glowi"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Throwaway values for CI only; the real ones live on the server.
+      DATABASE_URL: postgresql://glowi:glowi@localhost:5432/glowi
+      SESSION_SECRET: ci-only-session-secret-not-used-anywhere
+      SMSLINK_TEST: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Database (migrate + seed)
+        run: |
+          npx prisma generate
+          npx prisma migrate deploy
+          npx prisma db seed
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run build
+
+  deploy:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    # One deploy at a time; a newer push waits instead of cancelling a running one.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      TARGET: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+      PORT: ${{ vars.SSH_PORT || '22' }}
+      APP_DIR: ${{ vars.APP_DIR || '/opt/glowi' }}
+    steps:
+      - name: SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
+      - name: Deploy on the server
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: |
+          set -euo pipefail
+          # First deploy: clone the (public) repository; afterwards deploy.sh fetches the commit.
+          ssh -p "$PORT" "$TARGET" \
+            "test -d '$APP_DIR/.git' || git clone '${{ github.server_url }}/${{ github.repository }}.git' '$APP_DIR'"
+          # Settings come from the ENV_FILE secret, never from the repository.
+          printf '%s\n' "$ENV_FILE" | ssh -p "$PORT" "$TARGET" "umask 077 && cat > '$APP_DIR/.env'"
+          ssh -p "$PORT" "$TARGET" "cd '$APP_DIR' && ./deploy/deploy.sh '${{ github.sha }}'"

@@ -3,15 +3,15 @@
 One server runs everything with Docker: the app, Postgres and a small scheduler for
 SMS reminders and backups. HTTPS comes from the reverse proxy the server already has
 (e.g. an existing Caddy container, see "Server that already runs Caddy") or from the
-bundled Caddy on an empty server. Azure Pipelines (connected to the GitHub repository) checks every push and, on
+bundled Caddy on an empty server. GitHub Actions checks every push and, on
 `main`, deploys over SSH.
 
 ```
 GitHub push to main
-  └─ Azure Pipelines: npm ci → migrate test DB → lint → types → build
-       └─ SSH to server → deploy/deploy.sh <commit>
+  └─ GitHub Actions: npm ci → migrate test DB → lint → types → build
+       └─ SSH to server: clone (first time) + copy .env → deploy/deploy.sh <commit>
             ├─ git checkout <commit>
-            ├─ prisma migrate deploy        (before the build: the build reads the DB)
+            ├─ prisma migrate deploy + seed (before the build: the build reads the DB)
             ├─ docker compose build app     (prerenders pages from the real DB)
             └─ start; if unhealthy → roll back to the previous image
 ```
@@ -30,7 +30,8 @@ As root on the server:
 # Docker + Compose (skip if Docker is already installed)
 curl -fsSL https://get.docker.com | sh
 
-# A user for deploys, allowed to run docker
+# A user for deploys, allowed to run docker (git is needed for the first clone)
+apt-get install -y git
 adduser --disabled-password --gecos "" deploy
 usermod -aG docker deploy
 
@@ -55,7 +56,7 @@ network instead, and your Caddy forwards the salon's domain to it.
    If it prints only `bridge` (the default network), create a shared one and attach Caddy:
    `docker network create web && docker network connect web <caddy-container>`.
 
-2. In `/opt/glowi/.env` (step 2): `PROXY_NETWORK=<that network>`, leave `COMPOSE_PROFILES` unset.
+2. In the settings file (step 2): `PROXY_NETWORK=<that network>`, leave `COMPOSE_PROFILES` unset.
    If ports 3000 or 5432 are already used on the server's loopback, change
    `APP_HOST_PORT` / `DB_HOST_PORT`.
 
@@ -71,89 +72,67 @@ network instead, and your Caddy forwards the salon's domain to it.
 On an **empty server** instead, set `COMPOSE_PROFILES=caddy` and `DOMAIN` / `ACME_EMAIL`:
 the bundled Caddy then handles HTTPS.
 
-## 2. Code on the server (once)
+## 2. Settings file (once)
 
-The server pulls the code with a **read-only deploy key**. As `deploy`:
-
-```bash
-su - deploy
-ssh-keygen -t ed25519 -f ~/.ssh/github_deploy -N "" -C "glowi server"
-cat ~/.ssh/github_deploy.pub
-```
-
-GitHub → your repo → **Settings → Deploy keys → Add deploy key**: paste it, leave
-"Allow write access" **off**. Then:
+On your computer, make the production `.env` from the template and fill in every value
+(new secrets: `openssl rand -base64 32` for `SESSION_SECRET`, `openssl rand -hex 32` for
+`CRON_SECRET`):
 
 ```bash
-cat >> ~/.ssh/config <<'EOF'
-Host github.com
-  IdentityFile ~/.ssh/github_deploy
-EOF
-git clone git@github.com:<you>/<repo>.git /opt/glowi
-cd /opt/glowi
-cp .env.production.example .env && chmod 600 .env
-nano .env   # fill in every value
+cp .env.production.example glowi.env
 ```
 
-## 3. First deploy (once)
+It is **never committed**: you paste it into a GitHub secret in step 3, and every deploy
+writes it to the server as `/opt/glowi/.env`. To change a setting later, update the secret
+and re-run the workflow. Delete the local copy afterwards or keep it somewhere safe.
+
+## 3. GitHub Actions (once)
+
+The workflow is `.github/workflows/deploy.yml`. On the first run it clones the (public)
+repository into `/opt/glowi` by itself; afterwards each run checks out the pushed commit.
+
+**Key pair for GitHub**, on your computer:
 
 ```bash
-cd /opt/glowi
-./deploy/deploy.sh                     # database, migrations, build, start (~3–5 min)
-docker compose -f compose.prod.yaml run --rm migrate npx prisma db seed
+ssh-keygen -t ed25519 -f glowi_deploy_key -N "" -C "github actions"
 ```
 
-The seed creates the service catalogue and the admin from `ADMIN_EMAIL` /
-`ADMIN_PASSWORD` (it refuses without a password of at least 10 characters). It never
-overwrites existing data, so it is safe to run again. Then:
+On the server, as root, allow it to log in as `deploy`:
+
+```bash
+mkdir -p /home/deploy/.ssh
+echo "<contents of glowi_deploy_key.pub>" >> /home/deploy/.ssh/authorized_keys
+chown -R deploy:deploy /home/deploy/.ssh && chmod 700 /home/deploy/.ssh && chmod 600 /home/deploy/.ssh/authorized_keys
+```
+
+On **GitHub** → the repository → **Settings → Environments → New environment**
+`production`, then **Add environment secret** for each:
+
+| Secret | Value |
+|---|---|
+| `SSH_HOST` | the server IP |
+| `SSH_USER` | `deploy` |
+| `SSH_PRIVATE_KEY` | contents of `glowi_deploy_key` (the private key, all lines) |
+| `SSH_KNOWN_HOSTS` | output of `ssh-keyscan -t ed25519 <server IP>` (one line) |
+| `ENV_FILE` | the whole `glowi.env` from step 2 |
+
+Optional **environment variables** there: `SSH_PORT` (default 22), `APP_DIR` (default
+`/opt/glowi`). Add **Required reviewers** to the environment if every deploy should wait
+for your OK.
+
+Then push to `main` (or re-run the last workflow run under **Actions**). The first deploy takes ~5 minutes. From now on every push to `main` is checked and
+deployed; pull requests are only checked.
+
+Each deploy also runs the production seed, which only **adds** what is missing: the first
+one creates the service catalogue and the admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD`
+(at least 10 characters); later ones change nothing. With an existing Caddy, now add the
+`deploy/Caddyfile.snippet` block and reload it (see above). Then:
 
 1. Open `https://<your domain>/admin/login` and log in.
 2. **Profil:** set the salon name, phone and opening hours; change the admin password.
 3. Add your clients. The demo seed (`db:seed:demo`) is for testing only; don't run it here.
 
-You can now remove `ADMIN_PASSWORD` from `.env`.
-
-## 4. Azure Pipelines (once)
-
-The pipeline is `azure-pipelines.yml` in the repository.
-
-**Key pair for the pipeline**, on your computer:
-
-```bash
-ssh-keygen -t ed25519 -f glowi_deploy_key -N "" -C "azure pipelines"
-```
-
-On the server, as `deploy`, allow it to log in:
-
-```bash
-echo "<contents of glowi_deploy_key.pub>" >> ~/.ssh/authorized_keys
-chmod 600 ~/.ssh/authorized_keys
-```
-
-In **Azure DevOps** (dev.azure.com):
-
-1. **Project** → **Pipelines → New pipeline → GitHub** → authorise → pick the repo →
-   **Existing Azure Pipelines YAML file** → `/azure-pipelines.yml`. Save (don't run yet).
-2. **Pipelines → Library → Secure files → + Secure file**: upload `glowi_deploy_key`
-   (the private key, no extension). Open it → **Pipeline permissions** → allow the pipeline.
-3. **Pipelines → Library → + Variable group** named exactly `glowi-production`:
-
-   | Variable | Value |
-   |---|---|
-   | `SSH_HOST` | the server IP |
-   | `SSH_USER` | `deploy` |
-   | `SSH_KNOWN_HOSTS` | output of `ssh-keyscan -t ed25519 <server IP>` (one line) |
-   | `SSH_PUBLIC_KEY` | contents of `glowi_deploy_key.pub` |
-   | `SSH_PORT` | optional, default 22 |
-   | `APP_DIR` | optional, default `/opt/glowi` |
-
-   **Pipeline permissions** → allow the pipeline.
-4. **Pipelines → Environments → New environment** `production` (resource: None). Add
-   **Approvals and checks** there if every deploy should wait for your OK.
-5. Run the pipeline. The first run asks you to **permit** the variable group, secure file
-   and environment: click **Permit** for each.
-
-From now on every push to `main` is checked and deployed; pull requests are only checked.
+You can then remove `ADMIN_PASSWORD` from the `ENV_FILE` secret.
 
 ## Everyday operations
 
@@ -164,7 +143,7 @@ All commands on the server in `/opt/glowi`, as `deploy`.
 | App logs | `docker compose -f compose.prod.yaml logs -f app` |
 | SMS job / backup logs | `docker compose -f compose.prod.yaml logs -f cron` |
 | Status | `docker compose -f compose.prod.yaml ps` |
-| Change a setting in `.env` | edit `.env`, then `docker compose -f compose.prod.yaml up -d app cron` |
+| Change a setting | update the `ENV_FILE` secret, re-run the workflow (a manual edit of `.env` is overwritten by the next deploy) |
 | Deploy a specific version | `./deploy/deploy.sh <commit>` |
 | Database shell | `docker compose -f compose.prod.yaml exec db psql -U glowi glowi` |
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Release a version on the server. Called by Azure Pipelines over SSH, or by hand:
+# Release a version on the server. Called by GitHub Actions over SSH, or by hand:
 #   ./deploy/deploy.sh <git-commit>     (default: latest origin/main)
 # Order matters: migrate first, because the app build reads the database.
 set -euo pipefail
@@ -33,6 +33,13 @@ log "Database"
 log "Migrations"
 "${COMPOSE[@]}" build migrate
 "${COMPOSE[@]}" run --rm migrate
+
+# Production seed: only adds what is missing (catalogue, first admin), so it is
+# safe on every deploy. Skipped when no ADMIN_PASSWORD is configured.
+if [ -n "${ADMIN_PASSWORD:-}" ]; then
+  log "Seed (adds missing data only)"
+  "${COMPOSE[@]}" run --rm migrate npx prisma db seed
+fi
 
 log "Building the app"
 docker image tag glowi-app:latest glowi-app:previous 2>/dev/null || true

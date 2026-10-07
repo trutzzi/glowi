@@ -123,7 +123,7 @@ It sends reminders for **tomorrow's** appointments and only acts between 10:00 a
 
 ## Deployment
 
-Production runs on your own server with Docker (app, Postgres, a scheduler for SMS and backups; HTTPS through the server's existing reverse proxy or a bundled Caddy), deployed by Azure Pipelines on every push to `main`. Step-by-step setup: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+Production runs on your own server with Docker (app, Postgres, a scheduler for SMS and backups; HTTPS through the server's existing reverse proxy or a bundled Caddy), deployed by GitHub Actions on every push to `main`. Step-by-step setup: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
 
 | File | Purpose |
 |---|---|
@@ -131,7 +131,7 @@ Production runs on your own server with Docker (app, Postgres, a scheduler for S
 | `compose.prod.yaml` | db, app, cron, migrate; optional caddy |
 | `deploy/compose.external-proxy.yaml`, `deploy/Caddyfile.snippet` | Running behind an existing Caddy in Docker |
 | `deploy/deploy.sh` | Release on the server: migrate → build → start, rollback if unhealthy |
-| `azure-pipelines.yml` | CI checks + SSH deploy (Azure DevOps, GitHub repo) |
+| `.github/workflows/deploy.yml` | CI checks + SSH deploy (GitHub Actions) |
 | `.env.production.example` | Every production setting |
 
 ## Useful commands

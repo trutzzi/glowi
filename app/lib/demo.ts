@@ -5,7 +5,7 @@ import { addDays } from '@/lib/dates'
 import type { UserRecord } from '@/app/lib/data'
 import type { MaintenanceView, MyAppointmentView, MyProfile, RequestStatusKey, RequestView } from '@/app/lib/definitions'
 
-// The public demo client ("Încearcă contul demo" on /login), for visitors who
+// The public demo client (faint "demo" link at the bottom of /login), for visitors who
 // want to see the app. It has no database row: its session carries this id and
 // the client data functions return the sample data below, built around today
 // from the salon's real services. So it never takes a real time slot, never

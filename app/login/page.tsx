@@ -20,14 +20,6 @@ export default function ClientLoginPage() {
           <LoginForm role="client" redirectTo="/home" submitLabel="CONECTARE" />
         </div>
 
-        {demoEnabled() && (
-          <form action={startDemo} className="mt-6 text-center">
-            <p className="text-sm text-gray-500">Vrei doar să vezi aplicația?</p>
-            <button className="mt-2 rounded-full border border-primary px-5 py-2 text-sm font-medium text-primary hover:bg-primary-soft">
-              Încearcă contul demo
-            </button>
-          </form>
-        )}
 
         <p className="mt-auto pt-10 text-center text-sm text-gray-500">
           Personal salon?{" "}
@@ -35,6 +27,12 @@ export default function ClientLoginPage() {
             Conectare administrator
           </Link>
         </p>
+        {/* Discreet on purpose: it's for visitors who want to look around, not for clients. */}
+        {demoEnabled() && (
+          <form action={startDemo} className="mt-3 text-center">
+            <button className="text-xs text-gray-300 hover:text-gray-500">demo</button>
+          </form>
+        )}
       </main>
     </MobileShell>
   );

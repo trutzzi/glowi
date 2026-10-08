@@ -2,7 +2,7 @@
 
 A mobile-first web app for a beauty salon, in Romanian. Clients see their appointments, the salon's services and messages; the admin manages services, clients, bookings, attendance and SMS reminders. Works on phones, tablets and desktop.
 
-**Live:** [glowi.valentintruta.ro](https://glowi.valentintruta.ro). To look around as a client, open [/login](https://glowi.valentintruta.ro/login) and press **Încearcă contul demo**. The demo account shows sample appointments built around today (one with an approved reschedule, so you can try the calendar), maintenance and profile; nothing you do there is saved, and it never touches the salon's real bookings or sends SMS. The admin side is private, since it holds real clients' data; the screenshots below and in [`marketing/`](marketing) show it.
+**Live:** [glowi.valentintruta.ro](https://glowi.valentintruta.ro). To look around as a client, open [/login](https://glowi.valentintruta.ro/login) and click the faint **demo** link at the very bottom of the page. The demo account shows sample appointments built around today (one with an approved reschedule, so you can try the calendar), maintenance and profile; nothing you do there is saved, and it never touches the salon's real bookings or sends SMS. The admin side is private, since it holds real clients' data; the screenshots below and in [`marketing/`](marketing) show it.
 
 <p>
   <img src="marketing/client/01-bun-venit-telefon.png" alt="Welcome screen" width="200">
@@ -101,13 +101,13 @@ Open http://localhost:3000.
 |---|---|---|---|
 | Admin | `/admin/login` | `admin@glowi.test` | `password123` — change it in Profil |
 | Demo client (after `db:seed:demo`) | `/login` | `0744 555 101` (Maria Popescu) | `Demo2026` |
-| Read-only demo client (no database data) | `/login` → **Încearcă contul demo** | | |
+| Read-only demo client (no database data) | `/login` → faint **demo** link at the bottom | | |
 
 Other demo clients: `0745 555 202`, `0746 555 303`, `0747 555 404`, `0748 555 505` (same password). Remove the demo data with `npm run db:seed:demo -- --remove`.
 
 ### Public demo account
 
-The **Încearcă contul demo** button on `/login` signs the visitor in as a client with the fixed id `demo` ([app/lib/demo.ts](app/lib/demo.ts)). That account has no database row: the client data functions return sample data built from the salon's real services, and every client write action answers "disabled in the demo account". It has no phone number, so it can't receive SMS, and the admin never sees it. Set `DEMO_ACCOUNT=0` to switch it off.
+The faint **demo** link at the bottom of `/login` signs the visitor in as a client with the fixed id `demo` ([app/lib/demo.ts](app/lib/demo.ts)). That account has no database row: the client data functions return sample data built from the salon's real services, and every client write action answers "disabled in the demo account". It has no phone number, so it can't receive SMS, and the admin never sees it. Set `DEMO_ACCOUNT=0` to switch it off.
 
 ## Install on a phone (PWA)
 

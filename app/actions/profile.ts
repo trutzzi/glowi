@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { db } from '@/lib/db'
 import { requireRole, verifySession } from '@/app/lib/dal'
 import { CURRENT_USER_TAG } from '@/app/actions/auth'
+import { DEMO_READ_ONLY, isDemo } from '@/app/lib/demo'
 import type { ProfileFormState } from '@/app/lib/definitions'
 
 const NewPassword = z
@@ -17,6 +18,7 @@ const NewPassword = z
 // Any logged-in user, for their own account only (the id comes from the session).
 export async function changePassword(_prev: ProfileFormState, formData: FormData): Promise<ProfileFormState> {
   const session = await verifySession()
+  if (isDemo(session.userId)) return { message: DEMO_READ_ONLY }
   const current = String(formData.get('currentPassword') ?? '')
   const next = String(formData.get('newPassword') ?? '')
   const confirm = String(formData.get('confirmPassword') ?? '')
@@ -38,6 +40,7 @@ export async function changePassword(_prev: ProfileFormState, formData: FormData
 export async function updateMyConsent(_prev: ProfileFormState, formData: FormData): Promise<ProfileFormState> {
   const session = await verifySession()
   if (session.role !== 'client') return { message: 'Doar pentru clienți' }
+  if (isDemo(session.userId)) return { message: DEMO_READ_ONLY }
 
   const sms = formData.get('smsMarketingConsent') === 'on'
   const email = formData.get('emailMarketingConsent') === 'on'

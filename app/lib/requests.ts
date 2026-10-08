@@ -1,6 +1,7 @@
 import 'server-only'
 import { db } from '@/lib/db'
 import { requireRole, verifySession } from '@/app/lib/dal'
+import { demoApprovedReschedule, demoRequests, isDemo } from '@/app/lib/demo'
 import type { RequestStatusKey, RequestView } from '@/app/lib/definitions'
 
 const include = {
@@ -49,6 +50,7 @@ export async function countPendingRequests(): Promise<number> {
 // Client: the latest request for each of their appointments, keyed by appointment id.
 export async function getMyLatestRequests(): Promise<Map<string, { id: string; type: RequestView['type']; status: RequestStatusKey; adminNote: string | null }>> {
   const session = await verifySession()
+  if (isDemo(session.userId)) return demoRequests()
   const rows = await db.appointmentRequest.findMany({
     where: { userId: String(session.userId) },
     orderBy: { createdAt: 'desc' },
@@ -62,6 +64,7 @@ export async function getMyLatestRequests(): Promise<Map<string, { id: string; t
 // Client: the approved reschedule for one of their appointments, if any.
 export async function getMyApprovedReschedule(appointmentId: string) {
   const session = await verifySession()
+  if (isDemo(session.userId)) return demoApprovedReschedule(appointmentId)
   return db.appointmentRequest.findFirst({
     where: { appointmentId, userId: String(session.userId), type: 'RESCHEDULE', status: 'APPROVED' },
     include: { appointment: { include: { service: { select: { id: true, title: true } } } } },

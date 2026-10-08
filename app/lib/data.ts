@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db'
 import type { Role } from '@/lib/auth'
 import { toInternational } from '@/lib/phone'
+import { demoUser, isDemo } from '@/app/lib/demo'
 
 export type UserRecord = {
   id: string
@@ -15,6 +16,7 @@ export type UserRecord = {
 const toRole = (role: string) => role.toLowerCase() as Role
 
 export async function findUserById(id: string): Promise<UserRecord | null> {
+  if (isDemo(id)) return demoUser
   const user = await db.user.findUnique({ where: { id } })
   if (!user) return null
   return { id: user.id, name: user.name, email: user.email, role: toRole(user.role) }

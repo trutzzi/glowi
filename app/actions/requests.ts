@@ -8,6 +8,7 @@ import { requireRole, verifySession } from '@/app/lib/dal'
 import { isClientSlotFree } from '@/app/lib/availability'
 import { sendAppointmentConfirmation, sendRequestDecision } from '@/lib/reminders'
 import { salonToUtc } from '@/lib/time'
+import { DEMO_READ_ONLY, isDemo } from '@/app/lib/demo'
 
 export type RequestFormState = { error?: string }
 
@@ -25,6 +26,7 @@ export async function createRequest(
 ): Promise<RequestFormState> {
   const session = await verifySession()
   if (session.role !== 'client') return { error: 'Doar pentru clienți' }
+  if (isDemo(session.userId)) return { error: DEMO_READ_ONLY }
   const message = Message.safeParse(formData.get('message') ?? '')
   if (!message.success) return { error: message.error.issues[0].message }
 
@@ -48,6 +50,7 @@ export async function createRequest(
 
 export async function withdrawRequest(requestId: string) {
   const session = await verifySession()
+  if (isDemo(session.userId)) redirect('/appointments?demo=1')
   await db.appointmentRequest.updateMany({
     where: { id: requestId, userId: String(session.userId), status: { in: ['PENDING', 'APPROVED'] } },
     data: { status: 'WITHDRAWN', completedAt: new Date() },
@@ -58,6 +61,7 @@ export async function withdrawRequest(requestId: string) {
 // After the admin approved a reschedule, the client picks the new time.
 export async function pickRescheduleSlot(requestId: string, day: string, time: string) {
   const session = await verifySession()
+  if (isDemo(session.userId)) redirect('/appointments?demo=1')
   const req = await db.appointmentRequest.findFirst({
     where: { id: requestId, userId: String(session.userId), type: 'RESCHEDULE', status: 'APPROVED' },
     include: { appointment: { include: { service: true } } },

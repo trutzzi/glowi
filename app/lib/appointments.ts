@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { requireRole, verifySession } from '@/app/lib/dal'
 import { salonToUtc } from '@/lib/time'
 import { addDays } from '@/lib/dates'
+import { demoAppointments, isDemo } from '@/app/lib/demo'
 import type { AppointmentView, BookingOptions, MyAppointmentView } from '@/app/lib/definitions'
 
 // Appointments are personal and change often, so they are never cached.
@@ -79,6 +80,7 @@ export async function getBookingOptions(): Promise<BookingOptions> {
 // never from the caller, so one client can't ask for another's.
 export async function getMyAppointments(): Promise<MyAppointmentView[]> {
   const session = await verifySession()
+  if (isDemo(session.userId)) return demoAppointments()
   const rows = await db.appointment.findMany({
     where: { userId: String(session.userId) },
     include,

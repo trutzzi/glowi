@@ -11,6 +11,7 @@ import { getMyLatestRequests } from "@/app/lib/requests";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { getAnnouncement, getSalonInfo } from "@/app/lib/settings";
 import { telLink } from "@/lib/phone";
+import { isDemo } from "@/app/lib/demo";
 import { SALON_TZ, formatDateTime } from "@/lib/time";
 
 // Everything here depends on who is logged in, so it streams in behind Suspense;
@@ -51,6 +52,12 @@ async function HomeContent() {
         <p className="text-sm text-gray-500 first-letter:uppercase">{today}</p>
         <h1 className="text-3xl text-gray-900">Bună, {firstName}!</h1>
       </header>
+
+      {isDemo(session.userId) && (
+        <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <span className="font-medium">Cont demo.</span> Programările și datele sunt exemple; poți explora tot, dar nimic nu se salvează.
+        </p>
+      )}
 
       <InstallPrompt />
 

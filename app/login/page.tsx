@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Logo } from "@/components/Logo";
 import { MobileShell } from "@/components/MobileShell";
 import { LoginForm } from "@/components/LoginForm";
+import { startDemo } from "@/app/actions/demo";
+import { demoEnabled } from "@/app/lib/demo";
 
 // Client login
 export default function ClientLoginPage() {
@@ -17,6 +19,15 @@ export default function ClientLoginPage() {
         <div className="mt-10">
           <LoginForm role="client" redirectTo="/home" submitLabel="CONECTARE" />
         </div>
+
+        {demoEnabled() && (
+          <form action={startDemo} className="mt-6 text-center">
+            <p className="text-sm text-gray-500">Vrei doar să vezi aplicația?</p>
+            <button className="mt-2 rounded-full border border-primary px-5 py-2 text-sm font-medium text-primary hover:bg-primary-soft">
+              Încearcă contul demo
+            </button>
+          </form>
+        )}
 
         <p className="mt-auto pt-10 text-center text-sm text-gray-500">
           Personal salon?{" "}

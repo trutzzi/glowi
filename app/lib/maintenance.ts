@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { requireRole, verifySession } from '@/app/lib/dal'
 import { utcToSalon } from '@/lib/time'
 import { dateOnly } from '@/lib/dates'
+import { demoMaintenance, isDemo } from '@/app/lib/demo'
 import type { MaintenanceOffer, MaintenanceState, MaintenanceView } from '@/app/lib/definitions'
 
 const include = {
@@ -74,6 +75,7 @@ export async function getClientMaintenance(clientId: string): Promise<Maintenanc
 // The logged-in client's own maintenance, except what the salon stopped.
 export async function getMyMaintenance(): Promise<MaintenanceView[]> {
   const session = await verifySession()
+  if (isDemo(session.userId)) return demoMaintenance()
   const rows = await db.maintenance.findMany({
     where: { userId: String(session.userId), OR: [{ active: true }, { clientDeclined: true }] },
     include,

@@ -7,20 +7,23 @@ import { getMyProfile } from "@/app/lib/profile";
 import { getMyMaintenance } from "@/app/lib/maintenance";
 import { setMyMaintenance } from "@/app/actions/maintenance";
 import { SALON_TZ } from "@/lib/time";
+import { DEMO_READ_ONLY } from "@/app/lib/demo";
 
-export default function ProfilePage() {
+type SearchParams = Promise<{ demo?: string }>;
+
+export default function ProfilePage({ searchParams }: { searchParams: SearchParams }) {
   return (
     <>
       <h1 className="mb-6 text-3xl text-gray-900">Profil</h1>
       <Suspense fallback={<p className="text-gray-500">Se încarcă profilul…</p>}>
-        <ProfileContent />
+        <ProfileContent searchParams={searchParams} />
       </Suspense>
     </>
   );
 }
 
-async function ProfileContent() {
-  const [profile, maintenance] = await Promise.all([getMyProfile(), getMyMaintenance()]); // both read the session
+async function ProfileContent({ searchParams }: { searchParams: SearchParams }) {
+  const [profile, maintenance, { demo }] = await Promise.all([getMyProfile(), getMyMaintenance(), searchParams]); // both read the session
   if (!profile) redirect("/login");
 
   const dateRo = (iso: string, withYear = true) =>
@@ -30,6 +33,7 @@ async function ProfileContent() {
 
   return (
     <div className="grid gap-4 pb-8 md:grid-cols-2">
+      {demo && <p className="rounded-xl bg-amber-50 px-4 py-2 text-sm text-amber-900 md:col-span-2">{DEMO_READ_ONLY}</p>}
       <section className="rounded-2xl bg-white p-5 shadow-sm md:col-span-2">
         <div className="flex items-center gap-4">
           <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-blush text-primary-dark">

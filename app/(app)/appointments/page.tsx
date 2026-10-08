@@ -6,8 +6,9 @@ import { NotificationSettings } from "@/components/NotificationSettings";
 import { verifySession } from "@/app/lib/dal";
 import { getMyAppointments } from "@/app/lib/appointments";
 import { getMyLatestRequests } from "@/app/lib/requests";
+import { DEMO_READ_ONLY } from "@/app/lib/demo";
 
-type SearchParams = Promise<{ cerere?: string; mutata?: string }>;
+type SearchParams = Promise<{ cerere?: string; mutata?: string; demo?: string }>;
 
 // The session read (cookies) is request-time data, so it must sit behind a
 // Suspense boundary; the heading stays in the static shell.
@@ -26,7 +27,7 @@ async function AppointmentsContent({ searchParams }: { searchParams: SearchParam
   const session = await verifySession();
   if (session.role !== "client") redirect("/login");
 
-  const [all, requests, { cerere, mutata }] = await Promise.all([getMyAppointments(), getMyLatestRequests(), searchParams]); // only this client's
+  const [all, requests, { cerere, mutata, demo }] = await Promise.all([getMyAppointments(), getMyLatestRequests(), searchParams]); // only this client's
   await connection(); // splits past/upcoming by the current time, so render at request time
   const now = new Date();
   const upcoming = all.filter((a) => a.status === "SCHEDULED" && new Date(a.start) > now).reverse(); // soonest first
@@ -34,6 +35,7 @@ async function AppointmentsContent({ searchParams }: { searchParams: SearchParam
 
   return (
     <>
+      {demo && <p className="mt-4 rounded-xl bg-amber-50 px-4 py-2 text-sm text-amber-900">{DEMO_READ_ONLY}</p>}
       {cerere && <p className="mt-4 rounded-xl bg-primary-soft px-4 py-2 text-sm text-gray-800">Cererea a fost trimisă. Primești un SMS când salonul răspunde.</p>}
       {mutata && <p className="mt-4 rounded-xl bg-green-50 px-4 py-2 text-sm text-green-800">Programarea a fost mutată. Ți-am trimis confirmarea prin SMS.</p>}
       <h2 className="mt-5 mb-3 text-lg font-medium">Programări viitoare</h2>

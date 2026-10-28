@@ -21,11 +21,8 @@ export async function getMyProfile(): Promise<MyProfile | null> {
     name: u.name,
     email: u.email,
     phone: u.phone,
-    birthday: u.birthday ? u.birthday.toISOString().slice(0, 10) : null,
     allergies: u.allergies,
-    smsMarketingConsent: u.smsMarketingConsent,
-    emailMarketingConsent: u.emailMarketingConsent,
-    consentUpdatedAt: u.consentUpdatedAt?.toISOString() ?? null,
+    allergiesConsentAt: u.allergiesConsentAt?.toISOString() ?? null,
     memberSince: u.createdAt.toISOString(),
     honoredVisits,
   }

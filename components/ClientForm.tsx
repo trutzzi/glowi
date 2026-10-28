@@ -22,8 +22,7 @@ export function ClientForm({ client }: { client?: ClientView }) {
   // After an error, show what the admin typed; otherwise the saved client.
   const value = (name: keyof ClientView) =>
     state.values?.[name] ?? (client?.[name] == null ? "" : String(client[name]));
-  const checked = (name: "smsMarketingConsent" | "emailMarketingConsent") =>
-    state.values ? state.values[name] === "on" : Boolean(client?.[name]);
+  const consentGiven = state.values ? state.values.allergiesConsent === "on" : Boolean(client?.allergiesConsentAt);
 
   const error = (name: string) =>
     state.errors?.[name]?.length ? (
@@ -50,33 +49,26 @@ export function ClientForm({ client }: { client?: ClientView }) {
         </Field>
       </div>
 
-      <Field label="Data nașterii">
-        <input name="birthday" type="date" defaultValue={value("birthday")} className={input} />
-        {error("birthday")}
-      </Field>
-
-      <Field label="Alergii și sensibilități">
+      <fieldset className="space-y-2 rounded-xl bg-white p-4 shadow-sm">
+        <legend className="px-1 text-sm text-gray-600">Alergii și sensibilități (date despre sănătate)</legend>
         <textarea name="allergies" rows={2} placeholder="ex. vopsea cu PPD, latex" defaultValue={value("allergies")} className={input} />
         {error("allergies")}
-      </Field>
+        <label className="flex items-start gap-2 text-sm text-gray-800">
+          <input type="checkbox" name="allergiesConsent" defaultChecked={consentGiven} className="mt-0.5" />
+          <span>Clientul și-a dat acordul explicit ca salonul să noteze alergiile, pentru siguranța tratamentelor.</span>
+        </label>
+        <p className="text-xs text-gray-500">
+          {client?.allergiesConsentAt
+            ? `Acord dat pe ${new Date(client.allergiesConsentAt).toLocaleDateString("ro-RO")}. Clientul îl poate retrage din Profil; alergiile se șterg atunci.`
+            : "Fără acord, alergiile nu se salvează. Debifarea șterge alergiile notate."}
+        </p>
+      </fieldset>
 
       <Field label="Note private (doar admin, nu sunt afișate clientului)">
         <textarea name="privateNotes" rows={3} placeholder='ex. formulă culoare "7.1 + 20 vol, 35 min"' defaultValue={value("privateNotes")} className={input} />
+        <p className="mt-1 text-xs text-gray-500">Fără informații despre sănătate aici; pentru alergii folosește câmpul de mai sus.</p>
         {error("privateNotes")}
       </Field>
-
-      <fieldset className="rounded-xl bg-white p-4 shadow-sm">
-        <legend className="px-1 text-sm text-gray-600">Consimțământ marketing (GDPR, opțional)</legend>
-        <label className="flex items-center gap-2 py-1 text-sm text-gray-800">
-          <input type="checkbox" name="smsMarketingConsent" defaultChecked={checked("smsMarketingConsent")} /> Oferte prin SMS
-        </label>
-        <label className="flex items-center gap-2 py-1 text-sm text-gray-800">
-          <input type="checkbox" name="emailMarketingConsent" defaultChecked={checked("emailMarketingConsent")} /> Oferte prin email
-        </label>
-        {client?.consentUpdatedAt && (
-          <p className="mt-1 text-xs text-gray-500">Modificat ultima dată {new Date(client.consentUpdatedAt).toLocaleString("ro-RO")}</p>
-        )}
-      </fieldset>
 
       <Field label={client ? "Parolă nouă (lasă gol pentru a o păstra pe cea actuală)" : "Parolă temporară"}>
         <div className="flex gap-2">

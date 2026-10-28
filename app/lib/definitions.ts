@@ -44,12 +44,9 @@ export type ClientListItem = {
 // Everything the admin can see and edit about a client. Admin-only: it
 // includes privateNotes, so never pass it to a client-facing screen.
 export type ClientView = ClientListItem & {
-  birthday: string | null // "YYYY-MM-DD"
   allergies: string | null
+  allergiesConsentAt: string | null // ISO; when the client agreed to have allergies noted
   privateNotes: string | null
-  smsMarketingConsent: boolean
-  emailMarketingConsent: boolean
-  consentUpdatedAt: string | null // ISO timestamp
 }
 
 export type ClientFormState = {
@@ -161,11 +158,8 @@ export type MyProfile = {
   name: string
   email: string | null
   phone: string | null
-  birthday: string | null // "YYYY-MM-DD"
   allergies: string | null
-  smsMarketingConsent: boolean
-  emailMarketingConsent: boolean
-  consentUpdatedAt: string | null
+  allergiesConsentAt: string | null
   memberSince: string // ISO
   honoredVisits: number
 }

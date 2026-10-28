@@ -66,6 +66,11 @@ async function ClientFile({ params, searchParams }: Props) {
               <p>
                 <span className="font-medium">Alergii: </span>
                 {client.allergies}
+                {!client.allergiesConsentAt && (
+                  <span className="mt-1 block text-xs">
+                    Fără acord înregistrat. Cere acordul clientului și bifează-l în Editează, altfel șterge alergiile.
+                  </span>
+                )}
               </p>
             </div>
           )}

@@ -109,11 +109,8 @@ export async function demoProfile(): Promise<MyProfile> {
     name: demoUser.name,
     email: 'demo@exemplu.ro',
     phone: null,
-    birthday: '1992-04-18',
     allergies: 'Latex',
-    smsMarketingConsent: true,
-    emailMarketingConsent: false,
-    consentUpdatedAt: null,
+    allergiesConsentAt: salonToUtc(addDays(today(), -120), '10:00').toISOString(),
     memberSince: salonToUtc(addDays(today(), -120), '10:00').toISOString(),
     honoredVisits: visits.filter((a) => a.status === 'HONORED').length,
   }

@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { AlertTriangle, User } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
-import { ConsentForm, PasswordForm } from "@/components/ProfileForms";
+import { AllergyConsentForm, PasswordForm } from "@/components/ProfileForms";
 import { getMyProfile } from "@/app/lib/profile";
 import { getMyMaintenance } from "@/app/lib/maintenance";
 import { setMyMaintenance } from "@/app/actions/maintenance";
@@ -46,19 +46,24 @@ async function ProfileContent({ searchParams }: { searchParams: SearchParams }) 
             </p>
           </div>
         </div>
-        <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-3">
+        <dl className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
           <Detail label="Telefon (pentru conectare)" value={profile.phone} />
           <Detail label="Email" value={profile.email} />
-          <Detail label="Data nașterii" value={profile.birthday ? dateRo(`${profile.birthday}T12:00:00Z`, false) : null} />
         </dl>
         {profile.allergies && (
-          <p className="mt-4 flex gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-            <span>
-              <span className="font-medium">Alergii notate: </span>
-              {profile.allergies}
-            </span>
-          </p>
+          <div className="mt-4 space-y-3 rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+            <p className="flex gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+              <span>
+                <span className="font-medium">Alergii notate: </span>
+                {profile.allergies}
+                {profile.allergiesConsentAt && (
+                  <span className="block text-xs text-amber-800">Cu acordul tău din {dateRo(profile.allergiesConsentAt)}.</span>
+                )}
+              </span>
+            </p>
+            <AllergyConsentForm />
+          </div>
         )}
         <p className="mt-3 text-xs text-gray-500">Datele s-au schimbat? Spune-ne la următoarea vizită sau sună la salon.</p>
       </section>
@@ -97,10 +102,6 @@ async function ProfileContent({ searchParams }: { searchParams: SearchParams }) 
         <PasswordForm />
       </section>
 
-      <section className="rounded-2xl bg-white p-5 shadow-sm">
-        <h2 className="mb-3 font-medium text-gray-900">Oferte și noutăți</h2>
-        <ConsentForm profile={profile} />
-      </section>
 
       <div className="md:col-span-2">
         <LogoutButton redirectTo="/login" />

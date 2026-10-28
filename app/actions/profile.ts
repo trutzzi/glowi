@@ -43,28 +43,14 @@ export async function changePassword(_prev: ProfileFormState, formData: FormData
   return { ok: true, message: 'Parola a fost schimbată. Celelalte dispozitive au fost deconectate.' }
 }
 
-// A client controls their own marketing consent (GDPR: they must be able to withdraw it).
-export async function updateMyConsent(_prev: ProfileFormState, formData: FormData): Promise<ProfileFormState> {
+// A client withdraws their consent for health data (GDPR art. 7(3), 9): the
+// allergies are deleted at once. They can agree again at the salon.
+export async function withdrawAllergyConsent(): Promise<ProfileFormState> {
   const session = await verifySession()
   if (session.role !== 'client') return { message: 'Doar pentru clienți' }
   if (isDemo(session.userId)) return { message: DEMO_READ_ONLY }
-
-  const sms = formData.get('smsMarketingConsent') === 'on'
-  const email = formData.get('emailMarketingConsent') === 'on'
-  const user = await db.user.findUnique({
-    where: { id: String(session.userId) },
-    select: { smsMarketingConsent: true, emailMarketingConsent: true },
-  })
-  if (!user) return { message: 'Contul nu mai există' }
-
-  const changed = user.smsMarketingConsent !== sms || user.emailMarketingConsent !== email
-  if (changed) {
-    await db.user.update({
-      where: { id: String(session.userId) },
-      data: { smsMarketingConsent: sms, emailMarketingConsent: email, consentUpdatedAt: new Date() },
-    })
-  }
-  return { ok: true, message: changed ? 'Preferințele au fost salvate.' : 'Nicio modificare.' }
+  await db.user.update({ where: { id: String(session.userId) }, data: { allergies: null, allergiesConsentAt: null } })
+  return { ok: true, message: 'Acordul a fost retras și alergiile au fost șterse.' }
 }
 
 const AdminProfileSchema = z.object({

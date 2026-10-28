@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef } from "react";
-import { changePassword, updateAdminProfile, updateMyConsent } from "@/app/actions/profile";
+import { changePassword, updateAdminProfile, withdrawAllergyConsent } from "@/app/actions/profile";
 import { saveOpeningHours, saveSalonInfo } from "@/app/actions/settings";
 import { WEEKDAYS_RO, type MyProfile, type OpeningHours, type ProfileFormState, type SalonInfo } from "@/app/lib/definitions";
 
@@ -55,29 +55,22 @@ export function PasswordForm() {
   );
 }
 
-export function ConsentForm({ profile }: { profile: MyProfile }) {
-  const [state, action, pending] = useActionState<ProfileFormState, FormData>(updateMyConsent, {});
+// Client: withdraw consent for the allergies the salon noted (deletes them).
+export function AllergyConsentForm() {
+  const [state, action, pending] = useActionState<ProfileFormState, FormData>(withdrawAllergyConsent, {});
+  if (state.ok) return <Feedback state={state} />;
   return (
-    <form action={action} className="space-y-3">
-      <label className="flex items-start gap-3 text-sm text-gray-800">
-        <input type="checkbox" name="smsMarketingConsent" defaultChecked={profile.smsMarketingConsent} className="mt-0.5" />
-        <span>Vreau să primesc oferte și noutăți prin SMS</span>
-      </label>
-      {profile.email && (
-        <label className="flex items-start gap-3 text-sm text-gray-800">
-          <input type="checkbox" name="emailMarketingConsent" defaultChecked={profile.emailMarketingConsent} className="mt-0.5" />
-          <span>Vreau să primesc oferte și noutăți prin email</span>
-        </label>
-      )}
-      <p className="text-xs text-gray-500">
-        Reminderele pentru programări se trimit oricum; ele nu sunt mesaje de marketing.
-      </p>
-      <div className="flex items-center gap-3">
-        <button disabled={pending} className={submit}>
-          {pending ? "Se salvează…" : "Salvează preferințele"}
-        </button>
-        <Feedback state={state} />
-      </div>
+    <form
+      action={action}
+      onSubmit={(e) => {
+        if (!confirm("Retragi acordul? Alergiile notate vor fi șterse.")) e.preventDefault();
+      }}
+      className="flex flex-wrap items-center gap-3"
+    >
+      <button disabled={pending} className="rounded-full px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50 disabled:opacity-60">
+        {pending ? "Se retrage…" : "Retrage acordul și șterge alergiile"}
+      </button>
+      <Feedback state={state} />
     </form>
   );
 }

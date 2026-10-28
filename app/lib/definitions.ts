@@ -3,6 +3,7 @@ import type { Role } from '@/lib/auth'
 export type SessionPayload = {
   userId: string
   role?: Role
+  sv?: number // User.sessionVersion when the session was created
   expiresAt: Date
 }
 

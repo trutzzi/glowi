@@ -3,10 +3,19 @@ import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 import type { SessionPayload } from '@/app/lib/definitions'
 import type { Role } from '@/lib/auth'
+import { isSessionCurrent } from '@/app/lib/data'
 
 const COOKIE_NAME = 'session'
-const SESSION_DAYS = 7
-const encodedKey = new TextEncoder().encode(process.env.SESSION_SECRET)
+// Clients stay signed in for a week; the admin, who sees every client's data, for a working day.
+const SESSION_HOURS: Record<Role, number> = { client: 7 * 24, admin: 12 }
+
+// Read when first needed (not at import: the image build has no secrets).
+// A missing or short secret would make the login tokens forgeable.
+function signingKey() {
+  const secret = process.env.SESSION_SECRET ?? ''
+  if (secret.length < 32) throw new Error('SESSION_SECRET is missing or shorter than 32 characters')
+  return new TextEncoder().encode(secret)
+}
 
 const cookieOptions = (expires: Date) => ({
   httpOnly: true,
@@ -21,29 +30,29 @@ export async function encrypt(payload: SessionPayload) {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime(`${SESSION_DAYS}d`)
-    .sign(encodedKey)
+    .setExpirationTime(payload.expiresAt)
+    .sign(signingKey())
 }
 
 export async function decrypt(session: string | undefined = '') {
   try {
-    const { payload } = await jwtVerify(session, encodedKey, { algorithms: ['HS256'] })
+    const { payload } = await jwtVerify(session, signingKey(), { algorithms: ['HS256'] })
     return payload
   } catch {
     return undefined
   }
 }
 
-export async function createSession(userId: string, role: Role) {
-  const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000)
-  const session = await encrypt({ userId, role, expiresAt })
+export async function createSession(userId: string, role: Role, sessionVersion = 0) {
+  const expiresAt = new Date(Date.now() + SESSION_HOURS[role] * 60 * 60 * 1000)
+  const session = await encrypt({ userId, role, sv: sessionVersion, expiresAt })
   ;(await cookies()).set(COOKIE_NAME, session, cookieOptions(expiresAt))
 }
 
 // Used by getCurrentUser() in app/actions/auth.ts
 export async function getSession(): Promise<{ userId?: string }> {
   const payload = await decrypt((await cookies()).get(COOKIE_NAME)?.value)
-  return { userId: payload?.userId as string | undefined }
+  return { userId: (await isSessionCurrent(payload)) ? (payload!.userId as string) : undefined }
 }
 
 export async function deleteSession() {

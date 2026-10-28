@@ -28,6 +28,9 @@ model User {
   name                  String
   phone                 String?
   passwordHash          String
+  // Part of every login token; raising it signs out all existing sessions
+  // (after a password change or reset).
+  sessionVersion        Int                  @default(0)
   role                  Role                 @default(CLIENT)
   birthday              DateTime?            @db.Date
   allergies             String? // allergies and sensitivities: skincare, colour, lashes

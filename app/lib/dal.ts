@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { connection } from 'next/server'
 import { redirect } from 'next/navigation'
 import { decrypt } from '@/app/lib/session'
+import { isSessionCurrent } from '@/app/lib/data'
 import type { Role } from '@/lib/auth'
 
 export const verifySession = cache(async () => {
@@ -14,7 +15,7 @@ export const verifySession = cache(async () => {
     await connection()
     const session = await decrypt(cookie)
 
-    if (!session?.userId) {
+    if (!session?.userId || !(await isSessionCurrent(session))) {
         redirect('/login')
     }
 

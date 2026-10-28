@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { db } from '@/lib/db'
 import { requireRole, verifySession } from '@/app/lib/dal'
 import { CURRENT_USER_TAG } from '@/app/actions/auth'
+import { createSession } from '@/app/lib/session'
 import { DEMO_READ_ONLY, isDemo } from '@/app/lib/demo'
 import type { ProfileFormState } from '@/app/lib/definitions'
 
@@ -32,8 +33,14 @@ export async function changePassword(_prev: ProfileFormState, formData: FormData
   if (next !== confirm) return { errors: { confirmPassword: ['Parolele nu coincid'] } }
   if (next === current) return { errors: { newPassword: ['Alege o parolă diferită de cea actuală'] } }
 
-  await db.user.update({ where: { id: user.id }, data: { passwordHash: await bcrypt.hash(next, 10) } })
-  return { ok: true, message: 'Parola a fost schimbată.' }
+  // Signs out every other device; this one gets a fresh session.
+  const updated = await db.user.update({
+    where: { id: user.id },
+    data: { passwordHash: await bcrypt.hash(next, 10), sessionVersion: { increment: 1 } },
+    select: { role: true, sessionVersion: true },
+  })
+  await createSession(user.id, updated.role === 'ADMIN' ? 'admin' : 'client', updated.sessionVersion)
+  return { ok: true, message: 'Parola a fost schimbată. Celelalte dispozitive au fost deconectate.' }
 }
 
 // A client controls their own marketing consent (GDPR: they must be able to withdraw it).

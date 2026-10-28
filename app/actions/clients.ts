@@ -94,7 +94,8 @@ export async function saveClient(_prev: ClientFormState, formData: FormData): Pr
       existing.emailMarketingConsent !== data.emailMarketingConsent
     await db.user.update({
       where: { id },
-      data: { ...data, ...(passwordHash && { passwordHash }), ...(consentChanged && { consentUpdatedAt: new Date() }) },
+      // A new password also signs the client out of every device.
+      data: { ...data, ...(passwordHash && { passwordHash, sessionVersion: { increment: 1 } }), ...(consentChanged && { consentUpdatedAt: new Date() }) },
     })
   } else {
     const anyConsent = data.smsMarketingConsent || data.emailMarketingConsent

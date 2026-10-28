@@ -17,7 +17,7 @@ export const DEMO_READ_ONLY = 'Acțiune dezactivată în contul demo. Aici nu se
 export const demoEnabled = () => process.env.DEMO_ACCOUNT !== '0'
 export const isDemo = (userId: unknown) => userId === DEMO_USER_ID && demoEnabled()
 
-export const demoUser: UserRecord = { id: DEMO_USER_ID, name: 'Maria Demo', email: null, role: 'client' }
+export const demoUser: UserRecord = { id: DEMO_USER_ID, name: 'Maria Demo', email: null, role: 'client', sessionVersion: 0 }
 
 // [id, days from today, salon time, status]; the first two are upcoming.
 const VISITS = [

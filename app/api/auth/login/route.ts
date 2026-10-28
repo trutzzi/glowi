@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   }
 
   await recordSuccess(keys);
-  await createSession(record.id, record.role);
+  await createSession(record.id, record.role, record.sessionVersion);
   const user: User = { email: record.email, role: record.role };
   return Response.json(user);
 }

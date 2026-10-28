@@ -3,9 +3,11 @@ import { cacheLife, cacheTag } from 'next/cache'
 import { db } from '@/lib/db'
 import { requireRole } from '@/app/lib/dal'
 import type { Announcement, SalonInfo, SetupProgress } from '@/app/lib/definitions'
+import { DEFAULT_BRAND, isBodyFont, isHeadingFont, isHexColor, type Brand } from '@/lib/brand'
 
 export const ANNOUNCEMENT_TAG = 'announcement'
 export const SALON_TAG = 'salon'
+export const BRAND_TAG = 'brand'
 const EMPTY: Announcement = { enabled: false, title: '', body: '' }
 
 // Same for every client, so cached on the server; saveAnnouncement() refreshes it.
@@ -53,5 +55,20 @@ export async function getSalonInfo(): Promise<SalonInfo> {
   return {
     name: saved.name || process.env.SALON_NAME || 'Stylish Salon',
     phone: saved.phone ?? (process.env.SALON_PHONE || null),
+  }
+}
+
+// Accent colour and fonts (Profil → Aspect). Read by the root layout for every
+// page, so cached; saveBrand() refreshes it. Unknown values fall back to the defaults.
+export async function getBrand(): Promise<Brand> {
+  'use cache'
+  cacheTag(BRAND_TAG)
+  cacheLife('days')
+  const row = await db.setting.findUnique({ where: { key: 'brand' } })
+  const saved = (row?.value ?? {}) as Partial<Record<keyof Brand, string>>
+  return {
+    color: saved.color && isHexColor(saved.color) ? saved.color.toLowerCase() : DEFAULT_BRAND.color,
+    headingFont: saved.headingFont && isHeadingFont(saved.headingFont) ? saved.headingFont : DEFAULT_BRAND.headingFont,
+    bodyFont: saved.bodyFont && isBodyFont(saved.bodyFont) ? saved.bodyFont : DEFAULT_BRAND.bodyFont,
   }
 }

@@ -20,7 +20,7 @@ More screenshots (phone, tablet, desktop) are in [`marketing/`](marketing).
 - Upcoming and past appointments with status
 - Ask to cancel or reschedule an appointment; after the salon approves a reschedule, pick a new free time from a calendar (busy times and closed days are shown but can't be chosen)
 - Maintenance: see and stop the "come back" reminders
-- Profile: change password, manage SMS/email marketing consent (GDPR)
+- Profile: change password (signs out other devices), withdraw consent for noted allergies, link to the privacy notice
 
 **Admin**
 - Dashboard: rest of today, visits waiting for attendance, quick-start guide, SMS tools, client announcement
@@ -28,9 +28,9 @@ More screenshots (phone, tablet, desktop) are in [`marketing/`](marketing).
 - Calendar: block whole days or time ranges (e.g. a wedding) for everyone; warns about appointments already inside
 - Maintenance (Întreținere): each service has a "come back after N weeks" interval; when a visit is marked Onorată the admin decides whether the client wants it, and the client gets an SMS at 10:00 on the due day
 - Appointments: booking with automatic end time (duration + cleanup buffer), no double booking (enforced in the database), rescheduling, attendance (Onorată, Întârziat 5–30 min, Neonorată, Anulată târziu / la timp)
-- Clients: create clients (phone required, email optional), allergies, private notes, consent, full visit history and stats, call/WhatsApp buttons
+- Clients: create clients (phone required, email optional), allergies (only with the client's explicit consent), private notes, full visit history and stats, call/WhatsApp buttons; export a client's data (JSON) or delete the client with all their appointments
 - Services and categories: price, duration, cleanup buffer, photo upload, hide/show, ordering
-- Profile: salon name, phone and weekly opening hours, own login and password
+- Profile: salon name, phone and weekly opening hours, legal details for the privacy notice (`/confidentialitate`), own login and password
 - Error log at `/admin/logs` (faint "logs" link at the bottom of admin pages)
 
 **SMS** via [SMSLink](https://www.smslink.ro): a confirmation when an appointment is booked or rescheduled, a reminder at 10:00 the day before, maintenance reminders, and the salon's answer to cancel/reschedule requests.
@@ -108,6 +108,13 @@ Other demo clients: `0745 555 202`, `0746 555 303`, `0747 555 404`, `0748 555 50
 ### Public demo account
 
 The faint **demo** link at the bottom of `/login` signs the visitor in as a client with the fixed id `demo` ([app/lib/demo.ts](app/lib/demo.ts)). That account has no database row: the client data functions return sample data built from the salon's real services, and every client write action answers "disabled in the demo account". It has no phone number, so it can't receive SMS, and the admin never sees it. Set `DEMO_ACCOUNT=0` to switch it off.
+
+## Security and privacy
+
+- Login: at most 5 failed attempts per account and 20 per IP address in 15 minutes, then a 15-minute pause; same response time whether or not an account exists.
+- Sessions: signed cookie, 7 days for clients and 12 hours for the admin; changing or resetting a password signs out every other device. `SESSION_SECRET` must be at least 32 characters.
+- Headers: Content-Security-Policy, HSTS, Permissions-Policy, no `X-Powered-By` (`next.config.ts`).
+- Data protection: allergies (health data) are stored only with the client's explicit consent, which the client can withdraw in Profil; no birthday or marketing data is collected. The admin can export or delete a client from the client page. The privacy notice at `/confidentialitate` is generated from Profil → Date legale; its text is a template to be reviewed by the salon's lawyer.
 
 ## Install on a phone (PWA)
 

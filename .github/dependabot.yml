@@ -1,0 +1,13 @@
+# Weekly pull requests for outdated or vulnerable dependencies. They only run
+# the check job; nothing deploys until a pull request is merged into main.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

@@ -202,3 +202,12 @@ model CalendarEvent {
 
   @@index([startsAt, endsAt])
 }
+
+// Failed logins per IP address and per account, to slow down password guessing
+// (app/lib/login-throttle.ts). key: "ip:<address>" or "account:<email or phone>".
+model LoginThrottle {
+  key          String    @id
+  failures     Int       @default(0)
+  windowStart  DateTime  @default(now())
+  blockedUntil DateTime?
+}

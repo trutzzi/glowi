@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AlertTriangle, User } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
@@ -65,7 +66,10 @@ async function ProfileContent({ searchParams }: { searchParams: SearchParams }) 
             <AllergyConsentForm />
           </div>
         )}
-        <p className="mt-3 text-xs text-gray-500">Datele s-au schimbat? Spune-ne la următoarea vizită sau sună la salon.</p>
+        <p className="mt-3 text-xs text-gray-500">
+          Datele s-au schimbat? Spune-ne la următoarea vizită sau sună la salon. Cum folosim datele tale:{" "}
+          <Link href="/confidentialitate" className="text-primary hover:underline">Nota de informare</Link>.
+        </p>
       </section>
 
       {maintenance.length > 0 && (

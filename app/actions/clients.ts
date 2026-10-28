@@ -103,3 +103,12 @@ export async function saveClient(_prev: ClientFormState, formData: FormData): Pr
 
   redirect(`/admin/clients/${clientId}?saved=1`)
 }
+
+// GDPR right to erasure (art. 17): deletes the client with their appointments,
+// requests and maintenance (database cascades). Backups age out after
+// BACKUP_KEEP_DAYS. Admin only; the button asks for confirmation first.
+export async function deleteClient(id: string) {
+  await requireRole('admin')
+  await db.user.deleteMany({ where: { id, role: 'CLIENT' } })
+  redirect('/admin/clients?sters=1')
+}

@@ -169,6 +169,9 @@ export type ProfileFormState = { errors?: Partial<Record<string, string[]>>; ok?
 // Salon details edited by the admin in Profil; shown across the app, in SMS and WhatsApp.
 export type SalonInfo = { name: string; phone: string | null }
 
+// Who runs the salon, for the privacy notice (/confidentialitate). Set in Profil.
+export type LegalInfo = { company: string; cui: string; address: string; email: string }
+
 // Where a client's maintenance stands, for badges and grouping.
 export type MaintenanceState =
   | 'declined' // the client turned it off; nothing is sent

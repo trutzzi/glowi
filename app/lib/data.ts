@@ -34,6 +34,9 @@ export async function findUsersByPhone(phone: string, exceptId?: string) {
   return candidates.filter((u) => toInternational(u.phone!) === wanted)
 }
 
+// A valid bcrypt hash of a random string, compared when no account matches.
+const DUMMY_HASH = '$2b$10$CwTycUXWue0Thq9StjUM0uJ8.Gk6e4d5RvoqM9j1sP8dAJN9u1kbS'
+
 // `identifier` is an email, or a phone number for clients who log in with it.
 export async function verifyCredentials(
   identifier: string,
@@ -49,8 +52,10 @@ export async function verifyCredentials(
     const matches = await findUsersByPhone(id)
     user = matches.length === 1 ? await db.user.findUnique({ where: { id: matches[0].id } }) : null
   }
-  if (!user || toRole(user.role) !== role) return null
-  if (!(await bcrypt.compare(password, user.passwordHash))) return null
+  // Always run one bcrypt comparison, so the response time doesn't reveal
+  // whether an account exists for this phone or email.
+  const passwordOk = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_HASH)
+  if (!user || !passwordOk || toRole(user.role) !== role) return null
 
   return { id: user.id, name: user.name, email: user.email, role }
 }

@@ -14,6 +14,7 @@ import { requireRole } from "@/app/lib/dal";
 import { findUserById } from "@/app/lib/data";
 import { getAgenda } from "@/app/lib/appointments";
 import { formatTime, utcToSalon } from "@/lib/time";
+import { Loading } from "@/components/Loading";
 
 // The session read (cookies) is request-time data, so it sits behind Suspense;
 // the heading stays in the static shell.
@@ -21,7 +22,7 @@ export default function AdminPage() {
   return (
     <>
       <h1 className="mb-4 text-3xl font-medium text-gray-900">Panou</h1>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă…</p>}>
+      <Suspense fallback={<Loading />}>
         <Dashboard />
       </Suspense>
     </>

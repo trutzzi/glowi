@@ -10,6 +10,7 @@ import { getMyMaintenance } from "@/app/lib/maintenance";
 import { setMyMaintenance } from "@/app/actions/maintenance";
 import { SALON_TZ } from "@/lib/time";
 import { DEMO_READ_ONLY } from "@/app/lib/demo";
+import { Loading } from "@/components/Loading";
 
 type SearchParams = Promise<{ demo?: string }>;
 
@@ -17,7 +18,7 @@ export default function ProfilePage({ searchParams }: { searchParams: SearchPara
   return (
     <>
       <h1 className="mb-6 text-3xl text-gray-900">Profil</h1>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă profilul…</p>}>
+      <Suspense fallback={<Loading label="Se încarcă profilul…" />}>
         <ProfileContent searchParams={searchParams} />
       </Suspense>
     </>

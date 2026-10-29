@@ -7,6 +7,7 @@ import { isDay } from "@/lib/dates";
 import { StatusBadge } from "@/components/StatusBadge";
 import { formatDateTime, formatDay, formatTime, utcToSalon } from "@/lib/time";
 import type { AppointmentView } from "@/app/lib/definitions";
+import { Loading } from "@/components/Loading";
 
 type SearchParams = Promise<{ zi?: string }>;
 
@@ -31,7 +32,7 @@ export default function AdminAppointmentsPage({ searchParams }: { searchParams: 
           <Plus className="h-4 w-4" /> Programează
         </Link>
       </div>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă programările…</p>}>
+      <Suspense fallback={<Loading label="Se încarcă programările…" />}>
         <Agenda searchParams={searchParams} />
       </Suspense>
 

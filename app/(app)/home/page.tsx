@@ -13,12 +13,13 @@ import { getAnnouncement, getSalonInfo } from "@/app/lib/settings";
 import { telLink } from "@/lib/phone";
 import { isDemo } from "@/app/lib/demo";
 import { SALON_TZ, formatDateTime } from "@/lib/time";
+import { Loading } from "@/components/Loading";
 
 // Everything here depends on who is logged in, so it streams in behind Suspense;
 // the fallback keeps the screen from jumping while it loads.
 export default function HomePage() {
   return (
-    <Suspense fallback={<p className="pt-6 text-gray-500">Se încarcă…</p>}>
+    <Suspense fallback={<Loading />}>
       <HomeContent />
     </Suspense>
   );

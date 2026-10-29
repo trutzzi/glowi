@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { requireRole } from "@/app/lib/dal";
 import { clearLogs } from "@/app/actions/logs";
 import { SALON_TZ } from "@/lib/time";
+import { Loading } from "@/components/Loading";
 
 const SOURCE_LABELS: Record<string, string> = { server: "Server", client: "Browser", sms: "SMS" };
 
@@ -11,7 +12,7 @@ export default function LogsPage() {
     <>
       <h1 className="mb-1 text-3xl text-gray-900">Jurnal erori</h1>
       <p className="mb-4 text-sm text-gray-500">Ultimele 200 de erori din ultimele 30 de zile. Vizibil doar pentru administrator.</p>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă…</p>}>
+      <Suspense fallback={<Loading />}>
         <Logs />
       </Suspense>
     </>

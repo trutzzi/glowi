@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { AlertTriangle, User } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
+import { ThemeSwitch } from "@/components/ThemeSwitch";
 import { ConsentForm, PasswordForm } from "@/components/ProfileForms";
 import { getMyProfile } from "@/app/lib/profile";
 import { getMyMaintenance } from "@/app/lib/maintenance";
@@ -34,7 +35,7 @@ async function ProfileContent({ searchParams }: { searchParams: SearchParams }) 
   return (
     <div className="grid gap-4 pb-8 md:grid-cols-2">
       {demo && <p className="rounded-xl bg-amber-50 px-4 py-2 text-sm text-amber-900 md:col-span-2">{DEMO_READ_ONLY}</p>}
-      <section className="rounded-2xl bg-white p-5 shadow-sm md:col-span-2">
+      <section className="rounded-2xl bg-surface p-5 shadow-sm md:col-span-2">
         <div className="flex items-center gap-4">
           <div className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-blush text-primary-dark">
             <User className="h-6 w-6" />
@@ -64,7 +65,7 @@ async function ProfileContent({ searchParams }: { searchParams: SearchParams }) 
       </section>
 
       {maintenance.length > 0 && (
-        <section className="rounded-2xl bg-white p-5 shadow-sm md:col-span-2">
+        <section className="rounded-2xl bg-surface p-5 shadow-sm md:col-span-2">
           <h2 className="font-medium text-gray-900">Întreținere</h2>
           <p className="mb-3 text-sm text-gray-500">Îți trimitem un SMS când e timpul să revii. Poți opri oricând.</p>
           <ul className="space-y-2">
@@ -80,7 +81,7 @@ async function ProfileContent({ searchParams }: { searchParams: SearchParams }) 
                   </div>
                   <form action={setMyMaintenance.bind(null, m.id, off)}>
                     <button
-                      className={`rounded-full px-4 py-2 text-sm font-medium ${off ? "bg-primary text-white hover:bg-primary-dark" : "text-gray-700 ring-1 ring-gray-200 hover:bg-white"}`}
+                      className={`rounded-full px-4 py-2 text-sm font-medium ${off ? "bg-primary text-on-primary hover:bg-primary-dark" : "text-gray-700 ring-1 ring-gray-200 hover:bg-surface"}`}
                     >
                       {off ? "Pornește din nou" : "Oprește"}
                     </button>
@@ -92,14 +93,20 @@ async function ProfileContent({ searchParams }: { searchParams: SearchParams }) 
         </section>
       )}
 
-      <section className="rounded-2xl bg-white p-5 shadow-sm">
+      <section className="rounded-2xl bg-surface p-5 shadow-sm">
         <h2 className="mb-3 font-medium text-gray-900">Schimbă parola</h2>
         <PasswordForm />
       </section>
 
-      <section className="rounded-2xl bg-white p-5 shadow-sm">
+      <section className="rounded-2xl bg-surface p-5 shadow-sm">
         <h2 className="mb-3 font-medium text-gray-900">Oferte și noutăți</h2>
         <ConsentForm profile={profile} />
+      </section>
+
+      <section className="rounded-2xl bg-surface p-5 shadow-sm md:col-span-2">
+        <h2 className="font-medium text-gray-900">Aspect</h2>
+        <p className="mb-3 text-sm text-gray-500">Doar pe acest dispozitiv. „Automat” urmează setarea telefonului.</p>
+        <ThemeSwitch />
       </section>
 
       <div className="md:col-span-2">

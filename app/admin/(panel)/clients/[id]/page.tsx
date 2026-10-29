@@ -49,7 +49,7 @@ async function ClientFile({ params, searchParams }: Props) {
         </div>
         <Link
           href={`/admin/appointments/new?clientId=${client.id}`}
-          className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+          className="flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-dark"
         >
           <CalendarPlus className="h-4 w-4" /> Programează
         </Link>
@@ -73,7 +73,7 @@ async function ClientFile({ params, searchParams }: Props) {
           <Summary stats={history.stats} next={next} />
 
           {client.privateNotes && (
-            <div className="rounded-2xl bg-white p-4 shadow-sm">
+            <div className="rounded-2xl bg-surface p-4 shadow-sm">
               <p className="mb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase">Note private</p>
               <p className="text-sm whitespace-pre-line text-gray-800">{client.privateNotes}</p>
             </div>
@@ -99,7 +99,7 @@ async function ClientFile({ params, searchParams }: Props) {
       </div>
 
       {/* Editing is secondary to reading the file, so it starts collapsed (open right after a save). */}
-      <details open={Boolean(saved)} className="group rounded-2xl bg-white p-4 shadow-sm">
+      <details open={Boolean(saved)} className="group rounded-2xl bg-surface p-4 shadow-sm">
         <summary className="cursor-pointer text-sm font-medium text-primary">Editează datele clientului</summary>
         <div className="mt-4">
           <ClientForm client={client} />
@@ -117,7 +117,7 @@ function Summary({ stats, next }: { stats: ClientStats; next?: ClientHistoryItem
     { label: "Anulate târziu", value: stats.cancelledLate, warn: stats.cancelledLate > 0 },
   ];
   return (
-    <div className="space-y-3 rounded-2xl bg-white p-4 shadow-sm">
+    <div className="space-y-3 rounded-2xl bg-surface p-4 shadow-sm">
       <div className="grid grid-cols-2 gap-2">
         {tiles.map((t) => (
           <div key={t.label} className={`rounded-xl p-3 ${t.warn ? "bg-red-50" : "bg-gray-50"}`}>

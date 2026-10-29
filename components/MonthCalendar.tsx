@@ -13,10 +13,10 @@ export type CalendarCell = {
 const WEEK = ["L", "Ma", "Mi", "J", "V", "S", "D"]; // weeks start on Monday, as in Romania
 
 const TONE: Record<NonNullable<CalendarCell["tone"]>, string> = {
-  available: "bg-white text-gray-900 shadow-sm hover:ring-2 hover:ring-primary",
+  available: "bg-surface text-gray-900 shadow-sm hover:ring-2 hover:ring-primary",
   muted: "text-gray-300",
   blocked: "bg-red-50 text-red-800",
-  selected: "bg-primary text-white shadow-sm",
+  selected: "bg-primary text-on-primary shadow-sm",
 };
 
 // A month grid with previous/next links. Server Component: navigation is plain
@@ -40,7 +40,7 @@ export function MonthCalendar({
   const arrow = "grid h-9 w-9 place-items-center rounded-full text-gray-600 hover:bg-gray-100";
 
   return (
-    <div className="rounded-2xl bg-white/60 p-3 shadow-sm ring-1 ring-black/5">
+    <div className="rounded-2xl bg-surface/60 p-3 shadow-sm ring-1 ring-gray-900/5">
       <div className="mb-2 flex items-center justify-between">
         {canGoBack ? (
           <Link href={monthHref(addMonths(month, -1))} className={arrow} aria-label="Luna anterioară">

@@ -28,7 +28,7 @@ async function MaintenanceList() {
   const all = await getAllMaintenance(); // checks the admin role
   if (all.length === 0) {
     return (
-      <p className="rounded-2xl bg-white p-6 text-center text-sm text-gray-500 shadow-sm">
+      <p className="rounded-2xl bg-surface p-6 text-center text-sm text-gray-500 shadow-sm">
         Nicio întreținere încă. Setează intervalul la servicii, apoi la „Onorată” alege „Da, cu întreținere”.
       </p>
     );

@@ -50,7 +50,7 @@ async function Dashboard() {
       {!guideHidden && <AdminGuide progress={progress} />}
 
       {pendingRequests > 0 && (
-        <Link href="/admin/requests" className="block rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary-dark shadow-sm hover:bg-primary hover:text-white">
+        <Link href="/admin/requests" className="block rounded-2xl bg-primary-soft px-4 py-3 text-sm font-medium text-primary-dark shadow-sm hover:bg-primary hover:text-on-primary">
           {pendingRequests === 1 ? "O cerere nouă de la un client" : `${pendingRequests} cereri noi de la clienți`} (anulare / reprogramare) →
         </Link>
       )}
@@ -77,7 +77,7 @@ async function Dashboard() {
           <ul className="space-y-2">
             {todays.map((a) => (
               <li key={a.id}>
-                <Link href={`/admin/appointments/${a.id}`} className="flex items-center justify-between gap-2 rounded-2xl bg-white p-3 shadow-sm hover:shadow-md">
+                <Link href={`/admin/appointments/${a.id}`} className="flex items-center justify-between gap-2 rounded-2xl bg-surface p-3 shadow-sm hover:shadow-md">
                   <span className="text-sm text-gray-800">
                     <span className="font-medium">{formatTime(new Date(a.start))}</span> · {a.clientName} · {a.serviceTitle}
                   </span>
@@ -93,7 +93,7 @@ async function Dashboard() {
         <SmsTools redirectTo={smsRedirectTarget()} />
       </div>
 
-      <section id="mesaj-clienti" className="scroll-mt-24 rounded-2xl bg-white p-4 shadow-sm">
+      <section id="mesaj-clienti" className="scroll-mt-24 rounded-2xl bg-surface p-4 shadow-sm">
         <h2 className="font-medium text-gray-900">Mesaj pentru clienți</h2>
         <p className="mb-3 text-sm text-gray-500">Apare pe ecranul „Acasă” al fiecărui client.</p>
         <AnnouncementForm current={announcement} />

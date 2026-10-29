@@ -5,7 +5,7 @@ import { saveAnnouncement } from "@/app/actions/settings";
 import type { Announcement, AnnouncementFormState } from "@/app/lib/definitions";
 
 const input =
-  "w-full rounded-xl bg-white px-4 py-2.5 text-sm text-gray-800 shadow-sm ring-1 ring-gray-200 outline-none focus:ring-2 focus:ring-primary";
+  "w-full rounded-xl bg-surface px-4 py-2.5 text-sm text-gray-800 shadow-sm ring-1 ring-gray-200 outline-none focus:ring-2 focus:ring-primary";
 
 // Edits the message shown on every client's home screen.
 export function AnnouncementForm({ current }: { current: Announcement }) {
@@ -31,7 +31,7 @@ export function AnnouncementForm({ current }: { current: Announcement }) {
       <div className="flex items-center gap-3">
         <button
           disabled={pending}
-          className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-60"
+          className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-on-primary hover:bg-primary-dark disabled:opacity-60"
         >
           {pending ? "Se salvează…" : "Salvează mesajul"}
         </button>

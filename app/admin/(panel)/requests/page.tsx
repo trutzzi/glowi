@@ -36,7 +36,7 @@ async function Requests() {
       <section>
         <h2 className="mb-2 text-sm font-semibold tracking-wide text-gray-500 uppercase">De răspuns · {pending.length}</h2>
         {pending.length === 0 ? (
-          <p className="rounded-2xl bg-white p-6 text-center text-sm text-gray-500 shadow-sm">Nicio cerere nouă.</p>
+          <p className="rounded-2xl bg-surface p-6 text-center text-sm text-gray-500 shadow-sm">Nicio cerere nouă.</p>
         ) : (
           <ul className="grid gap-3 md:grid-cols-2">
             {pending.map((r) => (
@@ -95,7 +95,7 @@ function Summary({ r }: { r: RequestView }) {
 function PendingCard({ r }: { r: RequestView }) {
   const late = r.type === "CANCEL" && new Date(r.appointmentStart).getTime() - new Date(r.createdAt).getTime() < 24 * 3600_000;
   return (
-    <li className="space-y-3 rounded-2xl bg-white p-4 shadow-sm">
+    <li className="space-y-3 rounded-2xl bg-surface p-4 shadow-sm">
       <Summary r={r} />
       {r.message && <p className="rounded-xl bg-gray-50 px-3 py-2 text-sm text-gray-700">„{r.message}”</p>}
       {r.type === "CANCEL" && (
@@ -104,10 +104,10 @@ function PendingCard({ r }: { r: RequestView }) {
       {r.type === "RESCHEDULE" && <p className="text-xs text-gray-500">La aprobare, clientul primește SMS și își alege singur o oră liberă.</p>}
       <div className="flex flex-wrap items-end gap-2">
         <form action={approveRequest.bind(null, r.id)}>
-          <button className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark">Aprobă</button>
+          <button className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-dark">Aprobă</button>
         </form>
         <form action={rejectRequest.bind(null, r.id)} className="flex flex-1 items-center gap-2">
-          <input name="adminNote" maxLength={300} placeholder="Motiv (opțional)" className="min-w-0 flex-1 rounded-full bg-white px-3 py-2 text-sm ring-1 ring-gray-200 outline-none focus:ring-2 focus:ring-primary" />
+          <input name="adminNote" maxLength={300} placeholder="Motiv (opțional)" className="min-w-0 flex-1 rounded-full bg-surface px-3 py-2 text-sm ring-1 ring-gray-200 outline-none focus:ring-2 focus:ring-primary" />
           <button className="rounded-full px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50">Respinge</button>
         </form>
       </div>
@@ -117,7 +117,7 @@ function PendingCard({ r }: { r: RequestView }) {
 
 function HistoryRow({ r }: { r: RequestView }) {
   return (
-    <li className="rounded-2xl bg-white p-4 shadow-sm">
+    <li className="rounded-2xl bg-surface p-4 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <Summary r={r} />
         <span className="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">{STATUS_LABEL[r.status]}</span>

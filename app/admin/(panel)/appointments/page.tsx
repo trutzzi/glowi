@@ -26,7 +26,7 @@ export default function AdminAppointmentsPage({ searchParams }: { searchParams: 
         <h1 className="text-3xl font-medium text-gray-900">Programări</h1>
         <Link
           href="/admin/appointments/new"
-          className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+          className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-dark"
         >
           <Plus className="h-4 w-4" /> Programează
         </Link>
@@ -35,7 +35,7 @@ export default function AdminAppointmentsPage({ searchParams }: { searchParams: 
         <Agenda searchParams={searchParams} />
       </Suspense>
 
-      <details className="mt-8 rounded-2xl bg-white p-4 shadow-sm">
+      <details className="mt-8 rounded-2xl bg-surface p-4 shadow-sm">
         <summary className="cursor-pointer text-sm font-medium text-gray-700">Ce înseamnă statusurile?</summary>
         <dl className="mt-3 space-y-2">
           {LEGEND.map(([status, text]) => (
@@ -99,7 +99,7 @@ async function Agenda({ searchParams }: { searchParams: SearchParams }) {
 function Row({ appt, when }: { appt: AppointmentView; when: string }) {
   return (
     <li>
-      <Link href={`/admin/appointments/${appt.id}`} className="block rounded-2xl bg-white p-4 shadow-sm transition hover:shadow-md">
+      <Link href={`/admin/appointments/${appt.id}`} className="block rounded-2xl bg-surface p-4 shadow-sm transition hover:shadow-md">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <p className="font-medium text-gray-900">{appt.clientName}</p>

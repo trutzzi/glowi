@@ -6,7 +6,7 @@ import { saveClient } from "@/app/actions/clients";
 import type { ClientFormState, ClientView } from "@/app/lib/definitions";
 
 const input =
-  "w-full rounded-xl bg-white px-4 py-2.5 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary";
+  "w-full rounded-xl bg-surface px-4 py-2.5 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary";
 
 // A readable temporary password with letters and digits, e.g. "glow-k7m2p9".
 function generatePassword() {
@@ -65,7 +65,7 @@ export function ClientForm({ client }: { client?: ClientView }) {
         {error("privateNotes")}
       </Field>
 
-      <fieldset className="rounded-xl bg-white p-4 shadow-sm">
+      <fieldset className="rounded-xl bg-surface p-4 shadow-sm">
         <legend className="px-1 text-sm text-gray-600">Consimțământ marketing (GDPR, opțional)</legend>
         <label className="flex items-center gap-2 py-1 text-sm text-gray-800">
           <input type="checkbox" name="smsMarketingConsent" defaultChecked={checked("smsMarketingConsent")} /> Oferte prin SMS
@@ -84,7 +84,7 @@ export function ClientForm({ client }: { client?: ClientView }) {
           <button
             type="button"
             onClick={() => passwordRef.current && (passwordRef.current.value = generatePassword())}
-            className="shrink-0 rounded-xl bg-primary-soft px-3 text-sm text-gray-700 hover:bg-primary hover:text-white"
+            className="shrink-0 rounded-xl bg-primary-soft px-3 text-sm text-gray-700 hover:bg-primary hover:text-on-primary"
           >
             Generează
           </button>
@@ -99,7 +99,7 @@ export function ClientForm({ client }: { client?: ClientView }) {
         <button
           type="submit"
           disabled={pending}
-          className="flex-1 rounded-full bg-primary py-3 text-sm font-semibold tracking-widest text-white shadow-md transition hover:bg-primary-dark disabled:opacity-60"
+          className="flex-1 rounded-full bg-primary py-3 text-sm font-semibold tracking-widest text-on-primary shadow-md transition hover:bg-primary-dark disabled:opacity-60"
         >
           {pending ? "SE SALVEAZĂ…" : "SALVEAZĂ"}
         </button>

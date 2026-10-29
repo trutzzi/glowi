@@ -63,7 +63,7 @@ async function Picker({ params, searchParams }: Props) {
   return (
     <div className="grid gap-6 pb-8 md:grid-cols-2">
       <div className="space-y-3">
-        <p className="rounded-xl bg-white p-3 text-sm text-gray-700 shadow-sm">
+        <p className="rounded-xl bg-surface p-3 text-sm text-gray-700 shadow-sm">
           <span className="font-medium text-gray-900">{appt.service.title}</span> · acum {formatDateTime(appt.appointmentDate)}
         </p>
         <MonthCalendar
@@ -75,7 +75,7 @@ async function Picker({ params, searchParams }: Props) {
         />
         <p className="flex flex-wrap gap-3 text-xs text-gray-500">
           <span className="flex items-center gap-1">
-            <span className="h-3 w-3 rounded bg-white ring-1 ring-gray-200" /> liberă
+            <span className="h-3 w-3 rounded bg-surface ring-1 ring-gray-200" /> liberă
           </span>
           <span className="flex items-center gap-1">
             <span className="h-3 w-3 rounded bg-red-50 ring-1 ring-red-100" /> salon închis
@@ -100,7 +100,7 @@ async function Picker({ params, searchParams }: Props) {
                 {daySlots.slots.map((s) =>
                   s.available ? (
                     <form key={s.time} action={pickRescheduleSlot.bind(null, request.id, day, s.time)}>
-                      <button className="w-full rounded-xl bg-white py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-primary hover:text-white">
+                      <button className="w-full rounded-xl bg-surface py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-primary hover:text-on-primary">
                         {s.time}
                       </button>
                     </form>

@@ -30,7 +30,7 @@ function ActiveTabBar() {
 function TabBar({ pathname }: { pathname: string | null }) {
 
   return (
-    <nav className="sticky bottom-0 z-20 border-t border-gray-100 bg-white/95 pt-2 pb-[calc(1.25rem_+_env(safe-area-inset-bottom))] backdrop-blur md:pb-[calc(1rem_+_env(safe-area-inset-bottom))]">
+    <nav className="sticky bottom-0 z-20 border-t border-gray-100 bg-surface/95 pt-2 pb-[calc(1.25rem_+_env(safe-area-inset-bottom))] backdrop-blur md:pb-[calc(1rem_+_env(safe-area-inset-bottom))]">
       <div className="mx-auto grid max-w-xl grid-cols-4 md:gap-2">
       {tabs.map(({ href, label, icon: Icon }) => {
         const active = pathname?.startsWith(href) ?? false;

@@ -9,7 +9,7 @@ import type { CategoryView, ServiceFormState, ServiceView } from "@/app/lib/defi
 type Props = { service?: ServiceView; categories: CategoryView[] };
 
 const input =
-  "w-full rounded-xl bg-white px-4 py-2.5 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary";
+  "w-full rounded-xl bg-surface px-4 py-2.5 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary";
 
 export function ServiceForm({ service, categories }: Props) {
   const [state, formAction, pending] = useActionState<ServiceFormState, FormData>(saveService, {});
@@ -93,7 +93,7 @@ export function ServiceForm({ service, categories }: Props) {
         <button
           type="submit"
           disabled={pending}
-          className="flex-1 rounded-full bg-primary py-3 text-sm font-semibold tracking-widest text-white shadow-md transition hover:bg-primary-dark disabled:opacity-60"
+          className="flex-1 rounded-full bg-primary py-3 text-sm font-semibold tracking-widest text-on-primary shadow-md transition hover:bg-primary-dark disabled:opacity-60"
         >
           {pending ? "SE SALVEAZĂ…" : "SALVEAZĂ"}
         </button>

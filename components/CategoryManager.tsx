@@ -6,7 +6,7 @@ import { createCategory, deleteCategory, moveCategory, renameCategory } from "@/
 import type { CategoryFormState, CategoryWithCount } from "@/app/lib/definitions";
 
 const input =
-  "w-full min-w-0 rounded-xl bg-white px-3 py-2 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary";
+  "w-full min-w-0 rounded-xl bg-surface px-3 py-2 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary";
 const iconButton = "grid h-9 w-9 shrink-0 place-items-center rounded-full text-gray-600 hover:bg-gray-100 disabled:opacity-30";
 
 export function CategoryManager({ categories }: { categories: CategoryWithCount[] }) {
@@ -35,7 +35,7 @@ function CategoryRow({ category, first, last }: { category: CategoryWithCount; f
   };
 
   return (
-    <li className="rounded-2xl bg-white p-3 shadow-sm">
+    <li className="rounded-2xl bg-surface p-3 shadow-sm">
       <div className="flex items-center gap-1">
         <form action={rename} className="flex min-w-0 flex-1 items-center gap-2">
           <input name="name" defaultValue={category.name} required aria-label="Nume categorie" className={input} />
@@ -77,7 +77,7 @@ function NewCategory() {
   }, [state]);
 
   return (
-    <form ref={formRef} action={create} className="rounded-2xl bg-white p-3 shadow-sm">
+    <form ref={formRef} action={create} className="rounded-2xl bg-surface p-3 shadow-sm">
       <label className="mb-1 block text-sm text-gray-600" htmlFor="new-category">
         Categorie nouă
       </label>
@@ -85,7 +85,7 @@ function NewCategory() {
         <input id="new-category" name="name" required placeholder="ex. Epilare" className={input} />
         <button
           disabled={pending}
-          className="shrink-0 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-60"
+          className="shrink-0 rounded-full bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-dark disabled:opacity-60"
         >
           Adaugă
         </button>

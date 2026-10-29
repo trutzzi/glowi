@@ -61,12 +61,12 @@ export function HonoredControls({ appointmentId, started, honoredOnTime, lateMin
           Întârziat{lateMinutes ? ` (${lateMinutes} min)` : ""}
         </button>
         {menuOpen && (
-          <div role="menu" className="absolute top-full left-0 z-20 mt-2 w-44 rounded-2xl bg-white p-2 shadow-lg ring-1 ring-black/5">
+          <div role="menu" className="absolute top-full left-0 z-20 mt-2 w-44 rounded-2xl bg-surface p-2 shadow-lg ring-1 ring-gray-900/5">
             <p className="px-2 pb-1 text-xs text-gray-500">Cu cât a întârziat?</p>
             <div className="grid grid-cols-2 gap-1">
               {LATE_MINUTES.map((m) => (
                 <div key={m}>
-                  {choice(m, `${m} min`, "w-full rounded-xl px-2 py-2 text-sm text-gray-800 hover:bg-primary-soft disabled:bg-primary disabled:text-white", m === lateMinutes)}
+                  {choice(m, `${m} min`, "w-full rounded-xl px-2 py-2 text-sm text-gray-800 hover:bg-primary-soft disabled:bg-primary disabled:text-on-primary", m === lateMinutes)}
                 </div>
               ))}
             </div>
@@ -95,7 +95,7 @@ function MaintenanceDialog({ appointmentId, late, offer, onClose }: { appointmen
         role="dialog"
         aria-modal="true"
         aria-labelledby="maintenance-title"
-        className="w-full max-w-sm space-y-4 rounded-3xl bg-white p-6 shadow-xl"
+        className="w-full max-w-sm space-y-4 rounded-3xl bg-surface p-6 shadow-xl"
       >
         <div>
           <p className="text-xs font-semibold tracking-wide text-primary uppercase">
@@ -115,7 +115,7 @@ function MaintenanceDialog({ appointmentId, late, offer, onClose }: { appointmen
               <button type="button" onClick={onClose} className="rounded-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-100">
                 Renunță
               </button>
-              <button className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary-dark">Marchează Onorată</button>
+              <button className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-on-primary hover:bg-primary-dark">Marchează Onorată</button>
             </div>
           </>
         ) : (
@@ -146,7 +146,7 @@ function MaintenanceDialog({ appointmentId, late, offer, onClose }: { appointmen
               <button name="maintenance" value="no" className="rounded-full px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50">
                 Nu
               </button>
-              <button name="maintenance" value="yes" className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+              <button name="maintenance" value="yes" className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-on-primary hover:bg-primary-dark">
                 Da, cu întreținere
               </button>
             </div>

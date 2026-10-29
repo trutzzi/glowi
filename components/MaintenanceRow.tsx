@@ -12,7 +12,7 @@ export const dayRo = (day: string) =>
 export function MaintenanceRow({ m, back, showClient = true }: { m: MaintenanceView; back: string; showClient?: boolean }) {
   const editable = m.state !== "declined";
   return (
-    <li className="rounded-2xl bg-white p-4 shadow-sm">
+    <li className="rounded-2xl bg-surface p-4 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           {showClient ? (

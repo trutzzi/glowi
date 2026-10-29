@@ -5,6 +5,7 @@ import { getAllServices } from "@/app/lib/services";
 import { setServiceActive } from "@/app/actions/services";
 import { formatPrice } from "@/components/ServiceCard";
 import type { ServiceView } from "@/app/lib/definitions";
+import { Loading } from "@/components/Loading";
 
 export default function AdminServicesPage() {
   return (
@@ -23,7 +24,7 @@ export default function AdminServicesPage() {
           </Link>
         </div>
       </div>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă serviciile…</p>}>
+      <Suspense fallback={<Loading label="Se încarcă serviciile…" />}>
         <ServiceList />
       </Suspense>
     </>

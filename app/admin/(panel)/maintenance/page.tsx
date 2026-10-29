@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { MaintenanceRow } from "@/components/MaintenanceRow";
 import { getAllMaintenance } from "@/app/lib/maintenance";
 import type { MaintenanceState, MaintenanceView } from "@/app/lib/definitions";
+import { Loading } from "@/components/Loading";
 
 // Sections in the order the admin acts on them.
 const SECTIONS: { title: string; hint: string; states: MaintenanceState[] }[] = [
@@ -17,7 +18,7 @@ export default function MaintenancePage() {
     <>
       <h1 className="mb-1 text-3xl text-gray-900">Întreținere</h1>
       <p className="mb-5 text-sm text-gray-500">Clienții care revin periodic pentru un serviciu. Se pornește la marcarea „Onorată”.</p>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă…</p>}>
+      <Suspense fallback={<Loading />}>
         <MaintenanceList />
       </Suspense>
     </>

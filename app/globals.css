@@ -151,3 +151,41 @@
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+/*
+  Loading (components/Loading.tsx): each stroke draws in, holds, then draws out,
+  staggered per petal so the lotus blooms and fades in a loop. pathLength=1 on
+  the paths makes a dash of 1 cover any path. Fades in after 150ms so quick
+  loads show nothing.
+*/
+.loader {
+  animation: loader-in 300ms ease-out 150ms both;
+}
+.loader-stroke {
+  stroke-dasharray: 1;
+  animation: loader-draw 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite both;
+}
+.loader-glow {
+  animation: loader-glow 2.4s ease-in-out infinite;
+}
+@keyframes loader-in {
+  from { opacity: 0; transform: translateY(4px); }
+}
+@keyframes loader-draw {
+  0% { stroke-dashoffset: 1; }
+  40%, 65% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -1; }
+}
+@keyframes loader-glow {
+  0%, 100% { transform: scale(0.75); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+/* Reduced motion: the whole logo, still, with a gentle opacity pulse. */
+@media (prefers-reduced-motion: reduce) {
+  .loader-stroke { animation: none; stroke-dashoffset: 0; }
+  .loader-glow { animation: none; transform: scale(1); }
+  .loader svg { animation: loader-pulse 2s ease-in-out infinite; }
+}
+@keyframes loader-pulse {
+  50% { opacity: 0.55; }
+}

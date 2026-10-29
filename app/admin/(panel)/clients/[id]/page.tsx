@@ -14,6 +14,7 @@ import { MaintenanceRow } from "@/components/MaintenanceRow";
 import { getSalonInfo } from "@/app/lib/settings";
 import { formatDateTime } from "@/lib/time";
 import type { ClientHistoryItem, ClientStats } from "@/app/lib/definitions";
+import { Loading } from "@/components/Loading";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -23,7 +24,7 @@ type Props = {
 // params and searchParams are request-time data, so they are read inside Suspense.
 export default function ClientPage({ params, searchParams }: Props) {
   return (
-    <Suspense fallback={<p className="text-gray-500">Se încarcă…</p>}>
+    <Suspense fallback={<Loading />}>
       <ClientFile params={params} searchParams={searchParams} />
     </Suspense>
   );

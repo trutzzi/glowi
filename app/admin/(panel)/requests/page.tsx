@@ -4,6 +4,7 @@ import { approveRequest, rejectRequest } from "@/app/actions/requests";
 import { getRequests } from "@/app/lib/requests";
 import { formatDateTime } from "@/lib/time";
 import type { RequestStatusKey, RequestView } from "@/app/lib/definitions";
+import { Loading } from "@/components/Loading";
 
 const TYPE_LABEL = { CANCEL: "Anulare", RESCHEDULE: "Reprogramare" } as const;
 const STATUS_LABEL: Record<RequestStatusKey, string> = {
@@ -19,7 +20,7 @@ export default function RequestsPage() {
     <>
       <h1 className="mb-1 text-3xl text-gray-900">Cereri</h1>
       <p className="mb-5 text-sm text-gray-500">Cereri de anulare sau reprogramare trimise de clienți din aplicație.</p>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă…</p>}>
+      <Suspense fallback={<Loading />}>
         <Requests />
       </Suspense>
     </>

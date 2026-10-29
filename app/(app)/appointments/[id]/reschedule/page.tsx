@@ -8,6 +8,7 @@ import { CLIENT_HORIZON_DAYS, getDaySlots, getMonthAvailability } from "@/app/li
 import { pickRescheduleSlot } from "@/app/actions/requests";
 import { formatDateTime, utcToSalon } from "@/lib/time";
 import { addDays, isDay, isMonth } from "@/lib/dates";
+import { Loading } from "@/components/Loading";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -23,7 +24,7 @@ export default function ReschedulePage(props: Props) {
         ← Programările mele
       </Link>
       <h1 className="mt-2 mb-4 text-3xl text-gray-900">Alege o nouă dată</h1>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă…</p>}>
+      <Suspense fallback={<Loading />}>
         <Picker {...props} />
       </Suspense>
     </>

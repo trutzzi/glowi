@@ -9,12 +9,13 @@ import { getBrand, getLegalInfo, getSalonInfo } from "@/app/lib/settings";
 import { requireRole } from "@/app/lib/dal";
 import { getMyProfile } from "@/app/lib/profile";
 import { getSmsCredit } from "@/lib/sms";
+import { Loading } from "@/components/Loading";
 
 export default function AdminProfilePage() {
   return (
     <>
       <h1 className="mb-6 text-3xl text-gray-900">Profil</h1>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă…</p>}>
+      <Suspense fallback={<Loading />}>
         <AdminProfile />
       </Suspense>
     </>
@@ -64,7 +65,7 @@ async function AdminProfile() {
       <section className="rounded-2xl bg-surface p-5 shadow-sm md:col-span-2">
         <h2 className="font-medium text-gray-900">SMS-uri rămase</h2>
         <p className="mb-3 text-sm text-gray-500">Creditul din contul SMSLink, folosit pentru confirmări și remindere.</p>
-        <Suspense fallback={<p className="text-sm text-gray-500">Se verifică…</p>}>
+        <Suspense fallback={<Loading label="Se verifică…" size="sm" />}>
           <SmsCreditInfo />
         </Suspense>
       </section>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Plus, Search } from "lucide-react";
 import { getClients } from "@/app/lib/clients";
 import { getClientIdsWithMaintenance } from "@/app/lib/maintenance";
+import { Loading } from "@/components/Loading";
 
 type SearchParams = Promise<{ q?: string; filtru?: string; sters?: string }>;
 
@@ -19,7 +20,7 @@ export default function AdminClientsPage({ searchParams }: { searchParams: Searc
           <Plus className="h-4 w-4" /> Adaugă
         </Link>
       </div>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă clienții…</p>}>
+      <Suspense fallback={<Loading label="Se încarcă clienții…" />}>
         <ClientList searchParams={searchParams} />
       </Suspense>
     </>

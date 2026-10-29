@@ -10,6 +10,7 @@ export type UserRecord = {
   name: string
   email: string | null
   role: Role
+  sessionVersion: number
 }
 
 // The database stores roles as CLIENT/ADMIN; the app uses 'client'/'admin'.
@@ -19,7 +20,16 @@ export async function findUserById(id: string): Promise<UserRecord | null> {
   if (isDemo(id)) return demoUser
   const user = await db.user.findUnique({ where: { id } })
   if (!user) return null
-  return { id: user.id, name: user.name, email: user.email, role: toRole(user.role) }
+  return { id: user.id, name: user.name, email: user.email, role: toRole(user.role), sessionVersion: user.sessionVersion }
+}
+
+// A signed token is only half the check: the account must still exist, have the
+// same role, and not have changed password since (sessionVersion). Tokens made
+// before sessionVersion existed count as version 0.
+export async function isSessionCurrent(payload: Record<string, unknown> | undefined) {
+  if (!payload?.userId) return false
+  const user = await findUserById(String(payload.userId))
+  return Boolean(user && user.role === payload.role && user.sessionVersion === (Number(payload.sv) || 0))
 }
 
 // Users with this phone number, in any written form ("0712 345 678", "+40712345678", ...).
@@ -33,6 +43,9 @@ export async function findUsersByPhone(phone: string, exceptId?: string) {
   })
   return candidates.filter((u) => toInternational(u.phone!) === wanted)
 }
+
+// A valid bcrypt hash of a random string, compared when no account matches.
+const DUMMY_HASH = '$2b$10$CwTycUXWue0Thq9StjUM0uJ8.Gk6e4d5RvoqM9j1sP8dAJN9u1kbS'
 
 // `identifier` is an email, or a phone number for clients who log in with it.
 export async function verifyCredentials(
@@ -49,8 +62,10 @@ export async function verifyCredentials(
     const matches = await findUsersByPhone(id)
     user = matches.length === 1 ? await db.user.findUnique({ where: { id: matches[0].id } }) : null
   }
-  if (!user || toRole(user.role) !== role) return null
-  if (!(await bcrypt.compare(password, user.passwordHash))) return null
+  // Always run one bcrypt comparison, so the response time doesn't reveal
+  // whether an account exists for this phone or email.
+  const passwordOk = await bcrypt.compare(password, user?.passwordHash ?? DUMMY_HASH)
+  if (!user || !passwordOk || toRole(user.role) !== role) return null
 
-  return { id: user.id, name: user.name, email: user.email, role }
+  return { id: user.id, name: user.name, email: user.email, role, sessionVersion: user.sessionVersion }
 }

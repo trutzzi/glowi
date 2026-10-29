@@ -119,3 +119,25 @@ export async function saveBrand(_prev: ProfileFormState, formData: FormData): Pr
   updateTag(BRAND_TAG)
   return { ok: true, message: reset ? 'Aspectul implicit a fost restabilit.' : 'Salvat. Clienții văd noul aspect la următoarea deschidere.' }
 }
+
+const LegalSchema = z.object({
+  company: z.string().trim().min(2, 'Numele firmei este obligatoriu').max(120),
+  cui: z.string().trim().max(20, 'Maxim 20 de caractere'),
+  address: z.string().trim().min(5, 'Adresa este obligatorie').max(200),
+  email: z.email('Introdu un email valid').trim().toLowerCase(),
+})
+
+// The salon's legal details, shown in the privacy notice (/confidentialitate).
+export async function saveLegalInfo(_prev: ProfileFormState, formData: FormData): Promise<ProfileFormState> {
+  await requireRole('admin')
+  const parsed = LegalSchema.safeParse({
+    company: formData.get('company') ?? '',
+    cui: formData.get('cui') ?? '',
+    address: formData.get('address') ?? '',
+    email: formData.get('email') ?? '',
+  })
+  if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors }
+  await db.setting.upsert({ where: { key: 'legal' }, update: { value: parsed.data }, create: { key: 'legal', value: parsed.data } })
+  updateTag(SALON_TAG)
+  return { ok: true, message: 'Salvat. Nota de informare folosește aceste date.' }
+}

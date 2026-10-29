@@ -33,12 +33,9 @@ export async function getClientById(id: string): Promise<ClientView | null> {
     name: u.name,
     email: u.email,
     phone: u.phone,
-    birthday: u.birthday ? u.birthday.toISOString().slice(0, 10) : null,
     allergies: u.allergies,
+    allergiesConsentAt: u.allergiesConsentAt?.toISOString() ?? null,
     privateNotes: u.privateNotes,
-    smsMarketingConsent: u.smsMarketingConsent,
-    emailMarketingConsent: u.emailMarketingConsent,
-    consentUpdatedAt: u.consentUpdatedAt?.toISOString() ?? null,
   }
 }
 

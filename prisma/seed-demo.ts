@@ -36,10 +36,8 @@ const clients = [
     name: "Maria Popescu",
     phone: "0744 555 101",
     email: "maria.popescu@example.ro",
-    birthday: "1990-05-17",
-    allergies: "Latex",
+    allergies: "Latex", // with consent (allergiesConsentAt), like every client with allergies
     privateNotes: "Formulă culoare: 7.1 + 20 vol, 35 min. Preferă ceai verde.",
-    smsMarketingConsent: true,
     since: -127, // days ago
   },
   { id: `${ID}ana`, name: "Ana Ionescu", phone: "0745 555 202", since: -109 },
@@ -115,11 +113,10 @@ async function add() {
     return;
   }
   const passwordHash = await bcrypt.hash(PASSWORD, 10);
-  for (const { id, since, birthday, ...c } of clients) {
+  for (const { id, since, ...c } of clients) {
     const data = {
       ...c,
-      birthday: birthday ? new Date(`${birthday}T00:00:00Z`) : null,
-      consentUpdatedAt: c.smsMarketingConsent ? new Date() : null,
+      allergiesConsentAt: c.allergies ? new Date(`${salonDay(since)}T09:00:00Z`) : null,
       createdAt: new Date(`${salonDay(since)}T09:00:00Z`),
     };
     await db.user.upsert({ where: { id }, update: data, create: { id, role: "CLIENT", passwordHash, ...data } });

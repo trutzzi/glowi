@@ -1,10 +1,11 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { LogoutButton } from "@/components/LogoutButton";
+import Link from "next/link";
 import { ThemeSwitch } from "@/components/ThemeSwitch";
-import { AdminProfileForm, BrandForm, OpeningHoursForm, PasswordForm, SalonForm } from "@/components/ProfileForms";
+import { AdminProfileForm, BrandForm, LegalForm, OpeningHoursForm, PasswordForm, SalonForm } from "@/components/ProfileForms";
 import { getOpeningHours } from "@/app/lib/availability";
-import { getBrand, getSalonInfo } from "@/app/lib/settings";
+import { getBrand, getLegalInfo, getSalonInfo } from "@/app/lib/settings";
 import { requireRole } from "@/app/lib/dal";
 import { getMyProfile } from "@/app/lib/profile";
 
@@ -21,7 +22,7 @@ export default function AdminProfilePage() {
 
 async function AdminProfile() {
   await requireRole("admin");
-  const [profile, salon, hours, brand] = await Promise.all([getMyProfile(), getSalonInfo(), getOpeningHours(), getBrand()]);
+  const [profile, salon, hours, brand, legal] = await Promise.all([getMyProfile(), getSalonInfo(), getOpeningHours(), getBrand(), getLegalInfo()]);
   if (!profile) notFound();
 
   return (
@@ -46,6 +47,18 @@ async function AdminProfile() {
           <p className="mb-3 text-sm text-gray-500">Fiecare persoană alege pe dispozitivul ei; „Automat” urmează setarea sistemului.</p>
           <ThemeSwitch />
         </div>
+      </section>
+      <section className="rounded-2xl bg-surface p-5 shadow-sm md:col-span-2">
+        <h2 className="font-medium text-gray-900">Date legale (GDPR)</h2>
+        <p className="mb-1 text-sm text-gray-500">
+          Apar în{" "}
+          <Link href="/confidentialitate" className="text-primary hover:underline">
+            Nota de informare
+          </Link>{" "}
+          pe care o văd clienții.
+        </p>
+        <p className="mb-4 text-xs text-amber-800">Textul notei este un model. Verificați-l cu un jurist înainte de a vă baza pe el.</p>
+        <LegalForm legal={legal} />
       </section>
       <section className="rounded-2xl bg-surface p-5 shadow-sm">
         <h2 className="mb-3 font-medium text-gray-900">Datele tale</h2>

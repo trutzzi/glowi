@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { AlertTriangle, CalendarPlus } from "lucide-react";
 import { ClientForm } from "@/components/ClientForm";
+import { DeleteClientButton } from "@/components/DeleteClientButton";
 import { ClientTimeline } from "@/components/ClientTimeline";
 import { ContactButtons } from "@/components/ContactButtons";
 import { formatPrice } from "@/components/ServiceCard";
@@ -66,6 +67,11 @@ async function ClientFile({ params, searchParams }: Props) {
               <p>
                 <span className="font-medium">Alergii: </span>
                 {client.allergies}
+                {!client.allergiesConsentAt && (
+                  <span className="mt-1 block text-xs">
+                    Fără acord înregistrat. Cere acordul clientului și bifează-l în Editează, altfel șterge alergiile.
+                  </span>
+                )}
               </p>
             </div>
           )}
@@ -105,6 +111,18 @@ async function ClientFile({ params, searchParams }: Props) {
           <ClientForm client={client} />
         </div>
       </details>
+
+      {/* GDPR: the client's rights of access and erasure. */}
+      <section className="rounded-2xl bg-surface p-4 shadow-sm">
+        <h2 className="text-sm font-medium text-gray-900">Datele clientului (GDPR)</h2>
+        <p className="mb-3 text-sm text-gray-500">La cererea clientului: descarcă tot ce are salonul despre el, sau șterge-l definitiv.</p>
+        <div className="flex flex-wrap gap-3">
+          <a href={`/admin/clients/${client.id}/export`} className="rounded-full px-4 py-2 text-sm font-medium text-gray-700 ring-1 ring-gray-200 hover:bg-gray-50">
+            Descarcă datele (JSON)
+          </a>
+          <DeleteClientButton id={client.id} name={client.name} />
+        </div>
+      </section>
     </div>
   );
 }

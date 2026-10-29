@@ -71,6 +71,7 @@ export default async function WelcomePage() {
             CONECTEAZĂ-TE
           </Link>
           <p className="mt-3 text-center text-xs text-gray-500">Folosește numărul de telefon și parola primită de la salon.</p>
+          <p className="mt-2 text-center text-xs text-gray-400"><Link href="/confidentialitate" className="underline hover:text-gray-700">Confidențialitate</Link></p>
         </div>
       </main>
     </MobileShell>

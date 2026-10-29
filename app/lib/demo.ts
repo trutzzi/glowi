@@ -17,7 +17,7 @@ export const DEMO_READ_ONLY = 'Acțiune dezactivată în contul demo. Aici nu se
 export const demoEnabled = () => process.env.DEMO_ACCOUNT !== '0'
 export const isDemo = (userId: unknown) => userId === DEMO_USER_ID && demoEnabled()
 
-export const demoUser: UserRecord = { id: DEMO_USER_ID, name: 'Maria Demo', email: null, role: 'client' }
+export const demoUser: UserRecord = { id: DEMO_USER_ID, name: 'Maria Demo', email: null, role: 'client', sessionVersion: 0 }
 
 // [id, days from today, salon time, status]; the first two are upcoming.
 const VISITS = [
@@ -109,11 +109,8 @@ export async function demoProfile(): Promise<MyProfile> {
     name: demoUser.name,
     email: 'demo@exemplu.ro',
     phone: null,
-    birthday: '1992-04-18',
     allergies: 'Latex',
-    smsMarketingConsent: true,
-    emailMarketingConsent: false,
-    consentUpdatedAt: null,
+    allergiesConsentAt: salonToUtc(addDays(today(), -120), '10:00').toISOString(),
     memberSince: salonToUtc(addDays(today(), -120), '10:00').toISOString(),
     honoredVisits: visits.filter((a) => a.status === 'HONORED').length,
   }

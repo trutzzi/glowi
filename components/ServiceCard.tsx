@@ -8,7 +8,7 @@ type Props = {
 
 export function ServiceCard({ service }: Props) {
   return (
-    <article className="flex h-full items-center gap-4 rounded-2xl bg-white p-3 shadow-sm transition hover:shadow-md">
+    <article className="flex h-full items-center gap-4 rounded-2xl bg-surface p-3 shadow-sm transition hover:shadow-md">
       {service.imageUrl ? (
         <Image src={service.imageUrl} alt={service.title} width={64} height={64} className="h-16 w-16 shrink-0 rounded-xl object-cover" />
       ) : (

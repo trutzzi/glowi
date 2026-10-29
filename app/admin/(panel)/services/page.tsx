@@ -17,7 +17,7 @@ export default function AdminServicesPage() {
           </Link>
           <Link
           href="/admin/services/new"
-          className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+          className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-dark"
         >
           <Plus className="h-4 w-4" /> Adaugă
           </Link>
@@ -49,7 +49,7 @@ async function ServiceList() {
           <h2 className="mb-2 text-sm font-semibold tracking-wide text-gray-500 uppercase">{category}</h2>
           <ul className="grid gap-2 md:grid-cols-2">
             {items.map((s) => (
-              <li key={s.id} className={`rounded-2xl bg-white p-4 shadow-sm ${s.active ? "" : "opacity-60"}`}>
+              <li key={s.id} className={`rounded-2xl bg-surface p-4 shadow-sm ${s.active ? "" : "opacity-60"}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-medium text-gray-900">

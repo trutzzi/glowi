@@ -14,6 +14,8 @@
   --color-ivory: #fbf7f4; /* app background */
   --color-canvas: #efe7e1; /* page background outside the mobile frame */
   --color-gold: #a8834f; /* decorative accents only */
+  --color-surface: #ffffff; /* cards, inputs, bars (use instead of white so dark mode can swap it) */
+  --color-on-primary: #ffffff; /* text and icons on primary buttons */
 
   /* Warm greys (Tailwind's stone) instead of the default cool greys. */
   --color-gray-50: #fafaf9;
@@ -47,6 +49,87 @@
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
+
+  ::selection {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-dark);
+  }
+}
+
+/*
+  Dark theme ("plum night"): aubergine surfaces, rose-pink accents with dark plum
+  text on buttons, champagne gold. data-theme is set before paint by the script in
+  lib/theme.ts (the visitor's choice, else the system setting). The brand colours
+  (primary, primary-soft, blush, hero, on-primary) come from lib/brand.ts, so a
+  custom salon colour gets its own dark variant. All text pairs meet WCAG AA.
+*/
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-ivory: #1a1117;
+  --color-canvas: #110a0f;
+  --color-surface: #251921;
+  --color-gold: #d9b77f;
+
+  /* Plum-tinted greys, inverted: 50 is the subtlest fill, 900 the brightest text. */
+  --color-gray-50: #2d2029;
+  --color-gray-100: #352630;
+  --color-gray-200: #45333e;
+  --color-gray-300: #5a4652;
+  --color-gray-400: #8c7883;
+  --color-gray-500: #ae99a5;
+  --color-gray-600: #c8b5bf;
+  --color-gray-700: #dccbd4;
+  --color-gray-800: #ecdfe6;
+  --color-gray-900: #f8eef3;
+
+  /* Status colours: deep tinted fills, light text. */
+  --color-red-50: #3b1a22;
+  --color-red-100: #4b1f2a;
+  --color-red-600: #f4899b;
+  --color-red-700: #f7a3b0;
+  --color-red-800: #fbc1ca;
+  --color-amber-50: #33270f;
+  --color-amber-100: #45341a;
+  --color-amber-700: #f0c46e;
+  --color-amber-800: #f6d18b;
+  --color-amber-900: #fbe3b2;
+  --color-green-50: #13291c;
+  --color-green-100: #183a26;
+  --color-green-700: #7fd6a1;
+  --color-green-800: #a6e5bd;
+  --color-blue-50: #14223b;
+  --color-blue-800: #accaf6;
+}
+
+/* Unlayered so they win over Tailwind utilities. */
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(60rem 40rem at 15% -10%, color-mix(in oklab, var(--color-primary) 14%, transparent), transparent 70%),
+    radial-gradient(50rem 30rem at 100% 110%, color-mix(in oklab, var(--color-gold) 9%, transparent), transparent 70%),
+    var(--color-canvas);
+  background-attachment: fixed;
+}
+
+/* The app frame gets a soft rose glow at the top, like candlelight. */
+:root[data-theme="dark"] .bg-ivory {
+  background-image:
+    radial-gradient(120% 45% at 50% -8%, color-mix(in oklab, var(--color-primary) 16%, transparent), transparent 70%),
+    radial-gradient(80% 30% at 100% 100%, color-mix(in oklab, var(--color-gold) 7%, transparent), transparent 70%);
+}
+
+/* Page titles shimmer from pearl to rose. */
+:root[data-theme="dark"] h1 {
+  background-image: linear-gradient(100deg, var(--color-gray-900) 35%, var(--color-primary-dark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Cards lose their shadow on a dark background; a faint rose hairline replaces it. */
+:root[data-theme="dark"] .bg-surface.shadow-sm,
+:root[data-theme="dark"] .bg-surface.shadow {
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-primary) 10%, transparent), 0 6px 20px -8px rgb(0 0 0 / 0.6);
 }
 
 /*

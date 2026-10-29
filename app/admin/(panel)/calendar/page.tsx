@@ -67,7 +67,7 @@ async function CalendarContent({ searchParams }: { searchParams: SearchParams })
           ) : (
             <ul className="space-y-2">
               {upcoming.map((e) => (
-                <li key={e.id} className="flex items-start justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm">
+                <li key={e.id} className="flex items-start justify-between gap-3 rounded-2xl bg-surface p-4 shadow-sm">
                   <div className="min-w-0">
                     <p className="font-medium text-gray-900">{e.title}</p>
                     <p className="text-sm text-gray-500 first-letter:uppercase">{eventWhen(e)}</p>
@@ -85,7 +85,7 @@ async function CalendarContent({ searchParams }: { searchParams: SearchParams })
         </section>
       </div>
 
-      <section className="h-fit rounded-2xl bg-white p-5 shadow-sm">
+      <section className="h-fit rounded-2xl bg-surface p-5 shadow-sm">
         <h2 className="mb-3 font-medium text-gray-900">Eveniment nou</h2>
         <EventForm today={today} />
       </section>

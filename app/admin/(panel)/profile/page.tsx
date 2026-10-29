@@ -2,9 +2,10 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { LogoutButton } from "@/components/LogoutButton";
 import Link from "next/link";
-import { AdminProfileForm, LegalForm, OpeningHoursForm, PasswordForm, SalonForm } from "@/components/ProfileForms";
+import { ThemeSwitch } from "@/components/ThemeSwitch";
+import { AdminProfileForm, BrandForm, LegalForm, OpeningHoursForm, PasswordForm, SalonForm } from "@/components/ProfileForms";
 import { getOpeningHours } from "@/app/lib/availability";
-import { getLegalInfo, getSalonInfo } from "@/app/lib/settings";
+import { getBrand, getLegalInfo, getSalonInfo } from "@/app/lib/settings";
 import { requireRole } from "@/app/lib/dal";
 import { getMyProfile } from "@/app/lib/profile";
 
@@ -21,12 +22,12 @@ export default function AdminProfilePage() {
 
 async function AdminProfile() {
   await requireRole("admin");
-  const [profile, salon, hours, legal] = await Promise.all([getMyProfile(), getSalonInfo(), getOpeningHours(), getLegalInfo()]);
+  const [profile, salon, hours, brand, legal] = await Promise.all([getMyProfile(), getSalonInfo(), getOpeningHours(), getBrand(), getLegalInfo()]);
   if (!profile) notFound();
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <section className="rounded-2xl bg-white p-5 shadow-sm md:col-span-2">
+      <section className="rounded-2xl bg-surface p-5 shadow-sm md:col-span-2">
         <h2 className="font-medium text-gray-900">Salonul</h2>
         <p className="mb-3 text-sm text-gray-500">Apare în bara de sus, pe ecranul de bun venit, în SMS-uri și în mesajele WhatsApp.</p>
         <div className="grid gap-6 lg:grid-cols-2">
@@ -37,7 +38,17 @@ async function AdminProfile() {
           </div>
         </div>
       </section>
-      <section className="rounded-2xl bg-white p-5 shadow-sm md:col-span-2">
+      <section className="rounded-2xl bg-surface p-5 shadow-sm md:col-span-2">
+        <h2 className="font-medium text-gray-900">Aspect</h2>
+        <p className="mb-4 text-sm text-gray-500">Culoarea și fonturile salonului, în toată aplicația (clienți și administrare).</p>
+        <BrandForm brand={brand} />
+        <div className="mt-6 max-w-md border-t border-gray-100 pt-5">
+          <h3 className="text-sm font-medium text-gray-700">Temă</h3>
+          <p className="mb-3 text-sm text-gray-500">Fiecare persoană alege pe dispozitivul ei; „Automat” urmează setarea sistemului.</p>
+          <ThemeSwitch />
+        </div>
+      </section>
+      <section className="rounded-2xl bg-surface p-5 shadow-sm md:col-span-2">
         <h2 className="font-medium text-gray-900">Date legale (GDPR)</h2>
         <p className="mb-1 text-sm text-gray-500">
           Apar în{" "}
@@ -49,11 +60,11 @@ async function AdminProfile() {
         <p className="mb-4 text-xs text-amber-800">Textul notei este un model. Verificați-l cu un jurist înainte de a vă baza pe el.</p>
         <LegalForm legal={legal} />
       </section>
-      <section className="rounded-2xl bg-white p-5 shadow-sm">
+      <section className="rounded-2xl bg-surface p-5 shadow-sm">
         <h2 className="mb-3 font-medium text-gray-900">Datele tale</h2>
         <AdminProfileForm profile={profile} />
       </section>
-      <section className="rounded-2xl bg-white p-5 shadow-sm">
+      <section className="rounded-2xl bg-surface p-5 shadow-sm">
         <h2 className="mb-3 font-medium text-gray-900">Schimbă parola</h2>
         <PasswordForm />
       </section>

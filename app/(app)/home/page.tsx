@@ -72,7 +72,7 @@ async function HomeContent() {
               <p className="mt-2 font-display text-2xl text-gray-900">{next.serviceTitle}</p>
               <p className="mt-1 text-gray-700 first-letter:uppercase">{formatDateTime(new Date(next.start))}</p>
               {openRequest && (
-                <p className="mt-3 rounded-xl bg-white/70 px-3 py-2 text-sm text-gray-800">
+                <p className="mt-3 rounded-xl bg-surface/70 px-3 py-2 text-sm text-gray-800">
                   {openRequest.status === "APPROVED"
                     ? "Reprogramarea a fost aprobată: alege noua dată în Programările mele."
                     : `Ai cerut ${openRequest.type === "CANCEL" ? "anularea" : "reprogramarea"}. Până răspunde salonul, programarea rămâne valabilă.`}
@@ -97,7 +97,7 @@ async function HomeContent() {
 
         {/* Message from the salon, written by the admin. */}
         {showAnnouncement ? (
-          <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-primary-soft">
+          <section className="rounded-3xl bg-surface p-5 shadow-sm ring-1 ring-primary-soft">
             <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-primary uppercase">
               <Megaphone className="h-4 w-4" aria-hidden /> De la salon
             </p>
@@ -105,7 +105,7 @@ async function HomeContent() {
             {announcement.body && <p className="mt-1 text-sm whitespace-pre-line text-gray-700">{announcement.body}</p>}
           </section>
         ) : (
-          <section className="rounded-3xl bg-white p-5 shadow-sm">
+          <section className="rounded-3xl bg-surface p-5 shadow-sm">
             <p className="flex items-center gap-2 text-xs font-semibold tracking-wide text-primary uppercase">
               <Sparkles className="h-4 w-4" aria-hidden /> {salon.name}
             </p>
@@ -116,14 +116,14 @@ async function HomeContent() {
       </div>
 
       <nav className="flex flex-wrap gap-2" aria-label="Acțiuni rapide">
-        <Link href="/services" className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+        <Link href="/services" className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-dark">
           Vezi serviciile
         </Link>
-        <Link href="/appointments" className="rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-primary-dark hover:bg-primary hover:text-white">
+        <Link href="/appointments" className="rounded-full bg-primary-soft px-4 py-2 text-sm font-medium text-primary-dark hover:bg-primary hover:text-on-primary">
           Programările mele
         </Link>
         {salonTel && (
-          <a href={salonTel} className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50">
+          <a href={salonTel} className="flex items-center gap-2 rounded-full bg-surface px-4 py-2 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50">
             <Phone className="h-4 w-4" aria-hidden /> Sună la salon
           </a>
         )}

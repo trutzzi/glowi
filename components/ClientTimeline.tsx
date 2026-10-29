@@ -17,7 +17,7 @@ const DOT: Record<AppointmentStatus, string> = {
 // `now` is passed in so the page decides it at request time.
 export function ClientTimeline({ items, now }: { items: ClientHistoryItem[]; now: Date }) {
   if (items.length === 0) {
-    return <p className="rounded-2xl bg-white p-6 text-center text-sm text-gray-500 shadow-sm">Nicio programare încă.</p>;
+    return <p className="rounded-2xl bg-surface p-6 text-center text-sm text-gray-500 shadow-sm">Nicio programare încă.</p>;
   }
 
   const upcoming = items.filter((a) => a.status === "SCHEDULED" && new Date(a.start) > now).reverse(); // soonest first
@@ -47,7 +47,7 @@ function Section({ title, items }: { title: string; items: ClientHistoryItem[] }
         {items.map((a) => (
           <li key={a.id} className="relative">
             <span className={`absolute top-5 -left-[27px] h-3 w-3 rounded-full ring-4 ring-ivory ${DOT[a.status]}`} aria-hidden />
-            <Link href={`/admin/appointments/${a.id}`} className="block rounded-2xl bg-white p-4 shadow-sm transition hover:shadow-md">
+            <Link href={`/admin/appointments/${a.id}`} className="block rounded-2xl bg-surface p-4 shadow-sm transition hover:shadow-md">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="font-medium text-gray-900">{a.serviceTitle}</p>

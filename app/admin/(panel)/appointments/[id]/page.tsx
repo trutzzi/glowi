@@ -67,7 +67,7 @@ async function AppointmentDetails({ params, searchParams }: Props) {
         </p>
       )}
 
-      <section className="rounded-2xl bg-white p-4 shadow-sm">
+      <section className="rounded-2xl bg-surface p-4 shadow-sm">
         <div className="flex items-start justify-between gap-2">
           <div>
             <Link href={`/admin/clients/${appt.clientId}`} className="font-medium text-primary hover:underline">

@@ -5,7 +5,8 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { requireRole } from '@/app/lib/dal'
-import { ANNOUNCEMENT_TAG, SALON_TAG } from '@/app/lib/settings'
+import { ANNOUNCEMENT_TAG, BRAND_TAG, SALON_TAG } from '@/app/lib/settings'
+import { DEFAULT_BRAND, isBodyFont, isHeadingFont, isHexColor } from '@/lib/brand'
 import { toInternational } from '@/lib/phone'
 import type { AnnouncementFormState, OpeningHours, ProfileFormState } from '@/app/lib/definitions'
 
@@ -94,6 +95,29 @@ export async function saveOpeningHours(_prev: ProfileFormState, formData: FormDa
   await db.setting.upsert({ where: { key: 'openingHours' }, update: { value: hours }, create: { key: 'openingHours', value: hours } })
   updateTag(SALON_TAG)
   return { ok: true, message: 'Programul a fost salvat.' }
+}
+
+const BrandSchema = z.object({
+  color: z.string().trim().refine(isHexColor, 'Alege o culoare'),
+  headingFont: z.string().refine(isHeadingFont, 'Alege un font din listă'),
+  bodyFont: z.string().refine(isBodyFont, 'Alege un font din listă'),
+})
+
+// Accent colour and fonts for the whole app. "reset" restores the defaults.
+export async function saveBrand(_prev: ProfileFormState, formData: FormData): Promise<ProfileFormState> {
+  await requireRole('admin')
+  const reset = formData.get('reset') === '1'
+  const parsed = BrandSchema.safeParse(
+    reset
+      ? DEFAULT_BRAND
+      : { color: formData.get('color') ?? '', headingFont: formData.get('headingFont') ?? '', bodyFont: formData.get('bodyFont') ?? '' }
+  )
+  if (!parsed.success) return { errors: z.flattenError(parsed.error).fieldErrors }
+
+  const value = { ...parsed.data, color: parsed.data.color.toLowerCase() }
+  await db.setting.upsert({ where: { key: 'brand' }, update: { value }, create: { key: 'brand', value } })
+  updateTag(BRAND_TAG)
+  return { ok: true, message: reset ? 'Aspectul implicit a fost restabilit.' : 'Salvat. Clienții văd noul aspect la următoarea deschidere.' }
 }
 
 const LegalSchema = z.object({

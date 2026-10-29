@@ -28,15 +28,21 @@ model User {
   name                  String
   phone                 String?
   passwordHash          String
+  // Part of every login token; raising it signs out all existing sessions
+  // (after a password change or reset).
+  sessionVersion        Int                  @default(0)
   role                  Role                 @default(CLIENT)
+  // No longer used (not needed, GDPR minimisation): emptied by a migration, kept
+  // only so a rollback to the previous release still works. Drop in a later release.
   birthday              DateTime?            @db.Date
-  allergies             String? // allergies and sensitivities: skincare, colour, lashes
-  privateNotes          String? // admin-only: preferences, colour formulas ("7.1 + 20 vol, 35 min")
-  // GDPR: marketing consent is per channel and must be opt-in, so both default to false.
-  // Appointment reminders are service messages, not marketing, and don't depend on these.
   smsMarketingConsent   Boolean              @default(false)
   emailMarketingConsent Boolean              @default(false)
-  consentUpdatedAt      DateTime? // when either consent last changed, as proof
+  consentUpdatedAt      DateTime?
+  // Allergies are health data (GDPR art. 9): stored only with the client's
+  // explicit consent, given at the salon; allergiesConsentAt records when.
+  allergies             String? // allergies and sensitivities: skincare, colour, lashes
+  allergiesConsentAt    DateTime?
+  privateNotes          String? // admin-only: preferences, colour formulas ("7.1 + 20 vol, 35 min"); no health data
   createdAt             DateTime             @default(now())
   appointments          Appointment[]
   maintenances          Maintenance[]
@@ -201,4 +207,13 @@ model CalendarEvent {
   createdAt DateTime @default(now())
 
   @@index([startsAt, endsAt])
+}
+
+// Failed logins per IP address and per account, to slow down password guessing
+// (app/lib/login-throttle.ts). key: "ip:<address>" or "account:<email or phone>".
+model LoginThrottle {
+  key          String    @id
+  failures     Int       @default(0)
+  windowStart  DateTime  @default(now())
+  blockedUntil DateTime?
 }

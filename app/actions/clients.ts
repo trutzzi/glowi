@@ -28,16 +28,11 @@ const ClientSchema = z.object({
     .trim()
     .min(1, 'Telefonul este obligatoriu pentru reminderele SMS')
     .regex(/^\+?[0-9 ()-]{6,20}$/, 'Telefon de forma 0712 345 678'),
-  birthday: z
-    .string()
-    .regex(/^$|^\d{4}-\d{2}-\d{2}$/, 'Alege o dată')
-    .refine((v) => !v || new Date(v) <= new Date(), 'Data nașterii nu poate fi în viitor')
-    .transform((v) => (v ? new Date(`${v}T00:00:00Z`) : null)),
   allergies: optionalText(500),
+  // Health data: only with the client's explicit consent. Unchecked checkboxes
+  // are not sent at all, so absence means "no".
+  allergiesConsent: z.literal('on').optional().transform(Boolean),
   privateNotes: optionalText(2000),
-  // Unchecked checkboxes are not sent at all, so absence means "no".
-  smsMarketingConsent: z.literal('on').optional().transform(Boolean),
-  emailMarketingConsent: z.literal('on').optional().transform(Boolean),
   // password is checked separately below; z.object drops it from parsed.data
 })
 
@@ -68,7 +63,12 @@ export async function saveClient(_prev: ClientFormState, formData: FormData): Pr
   delete safeValues.password
   if (!parsed.success || Object.keys(errors).length) return { errors, values: safeValues }
 
-  const { id, ...data } = parsed.data
+  const { id, allergiesConsent, ...fields } = parsed.data
+  if (fields.allergies && !allergiesConsent) {
+    return { errors: { allergies: ['Alergiile se pot nota doar cu acordul clientului: bifează căsuța de mai jos.'] }, values: safeValues }
+  }
+  // Without consent nothing about health is kept; with it, the first consent date is kept.
+  const data = { ...fields, allergies: allergiesConsent ? fields.allergies : null }
 
   const taken = data.email ? await db.user.findUnique({ where: { email: data.email }, select: { id: true } }) : null
   if (taken && taken.id !== id) {
@@ -83,26 +83,32 @@ export async function saveClient(_prev: ClientFormState, formData: FormData): Pr
 
   let clientId = id
   if (id) {
-    const existing = await db.user.findFirst({
-      where: { id, role: 'CLIENT' },
-      select: { smsMarketingConsent: true, emailMarketingConsent: true },
-    })
+    const existing = await db.user.findFirst({ where: { id, role: 'CLIENT' }, select: { allergiesConsentAt: true } })
     if (!existing) return { message: 'Acest client nu mai există' }
-    // GDPR: record when consent changed, as proof.
-    const consentChanged =
-      existing.smsMarketingConsent !== data.smsMarketingConsent ||
-      existing.emailMarketingConsent !== data.emailMarketingConsent
     await db.user.update({
       where: { id },
-      data: { ...data, ...(passwordHash && { passwordHash }), ...(consentChanged && { consentUpdatedAt: new Date() }) },
+      data: {
+        ...data,
+        allergiesConsentAt: allergiesConsent ? (existing.allergiesConsentAt ?? new Date()) : null,
+        // A new password also signs the client out of every device.
+        ...(passwordHash && { passwordHash, sessionVersion: { increment: 1 } }),
+      },
     })
   } else {
-    const anyConsent = data.smsMarketingConsent || data.emailMarketingConsent
     const created = await db.user.create({
-      data: { ...data, role: 'CLIENT', passwordHash: passwordHash!, ...(anyConsent && { consentUpdatedAt: new Date() }) },
+      data: { ...data, allergiesConsentAt: allergiesConsent ? new Date() : null, role: 'CLIENT', passwordHash: passwordHash! },
     })
     clientId = created.id
   }
 
   redirect(`/admin/clients/${clientId}?saved=1`)
+}
+
+// GDPR right to erasure (art. 17): deletes the client with their appointments,
+// requests and maintenance (database cascades). Backups age out after
+// BACKUP_KEEP_DAYS. Admin only; the button asks for confirmation first.
+export async function deleteClient(id: string) {
+  await requireRole('admin')
+  await db.user.deleteMany({ where: { id, role: 'CLIENT' } })
+  redirect('/admin/clients?sters=1')
 }

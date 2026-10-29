@@ -17,6 +17,8 @@ const ClientError = z.object({
 // per-IP limit keeps a misbehaving page (or a person) from flooding the log.
 const recent = new Map<string, number[]>()
 const LIMIT = 20 // reports per IP per minute
+const GLOBAL_LIMIT = 200 // reports per minute from everyone together
+let globalHits: number[] = []
 
 export async function reportClientError(input: z.input<typeof ClientError>) {
   const parsed = ClientError.safeParse(input)
@@ -24,9 +26,13 @@ export async function reportClientError(input: z.input<typeof ClientError>) {
 
   const ip = (await headers()).get('x-forwarded-for')?.split(',')[0].trim() || 'local'
   const now = Date.now()
+  globalHits = globalHits.filter((t) => now - t < 60_000)
   const hits = (recent.get(ip) ?? []).filter((t) => now - t < 60_000)
-  if (hits.length >= LIMIT) return
+  if (hits.length >= LIMIT || globalHits.length >= GLOBAL_LIMIT) return
   recent.set(ip, [...hits, now])
+  globalHits.push(now)
+  // Forget addresses that went quiet, so the map can't grow without end.
+  if (recent.size > 1000) for (const [key, times] of recent) if (times.every((t) => now - t >= 60_000)) recent.delete(key)
 
   await logError({ source: 'client', ...parsed.data })
 }

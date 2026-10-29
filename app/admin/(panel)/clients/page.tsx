@@ -4,7 +4,7 @@ import { Plus, Search } from "lucide-react";
 import { getClients } from "@/app/lib/clients";
 import { getClientIdsWithMaintenance } from "@/app/lib/maintenance";
 
-type SearchParams = Promise<{ q?: string; filtru?: string }>;
+type SearchParams = Promise<{ q?: string; filtru?: string; sters?: string }>;
 
 // searchParams is request-time data, so it is read inside Suspense.
 export default function AdminClientsPage({ searchParams }: { searchParams: SearchParams }) {
@@ -27,7 +27,7 @@ export default function AdminClientsPage({ searchParams }: { searchParams: Searc
 }
 
 async function ClientList({ searchParams }: { searchParams: SearchParams }) {
-  const { q = "", filtru } = await searchParams;
+  const { q = "", filtru, sters } = await searchParams;
   const onlyMaintenance = filtru === "intretinere";
   const [all, withMaintenance] = await Promise.all([getClients(q), getClientIdsWithMaintenance()]); // both check the admin role
   const clients = onlyMaintenance ? all.filter((c) => withMaintenance.has(c.id)) : all;
@@ -37,6 +37,7 @@ async function ClientList({ searchParams }: { searchParams: SearchParams }) {
 
   return (
     <>
+      {sters && <p className="mb-3 rounded-xl bg-primary-soft px-4 py-2 text-sm text-gray-800">Clientul și toate datele lui au fost șterse.</p>}
       {/* A plain GET form: the query lands in ?q= and the page re-renders on the server. */}
       <nav className="mb-3 flex gap-2" aria-label="Filtru clienți">
         <Link href={link()} className={tab(!onlyMaintenance)}>

@@ -10,7 +10,15 @@ import type { ServiceFormState } from '@/app/lib/definitions'
 
 // Uploaded service pictures. Keep under serverActions.bodySizeLimit in next.config.ts.
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024
-const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+
+// The real type, from the file's first bytes (the browser's declared type can be anything).
+function imageType(bytes: Uint8Array): 'image/jpeg' | 'image/png' | 'image/webp' | null {
+  const ascii = (from: number, to: number) => String.fromCharCode(...bytes.slice(from, to))
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg'
+  if (ascii(1, 4) === 'PNG' && bytes[0] === 0x89) return 'image/png'
+  if (ascii(0, 4) === 'RIFF' && ascii(8, 12) === 'WEBP') return 'image/webp'
+  return null
+}
 
 const ServiceSchema = z.object({
   id: z.string().optional(),
@@ -60,12 +68,14 @@ export async function saveService(_prev: ServiceFormState, formData: FormData): 
   const parsed = ServiceSchema.safeParse(values)
   const file = formData.get('image')
   const upload = file instanceof File && file.size > 0 ? file : null
+  const bytes = upload && upload.size <= MAX_IMAGE_BYTES ? new Uint8Array(await upload.arrayBuffer()) : null
+  const mimeType = bytes ? imageType(bytes) : null
   const imageError = !upload
     ? undefined
-    : !IMAGE_TYPES.includes(upload.type)
-      ? 'Folosește o imagine JPG, PNG sau WebP'
-      : upload.size > MAX_IMAGE_BYTES
-        ? 'Imaginea trebuie să aibă cel mult 4 MB'
+    : upload.size > MAX_IMAGE_BYTES
+      ? 'Imaginea trebuie să aibă cel mult 4 MB'
+      : !mimeType
+        ? 'Folosește o imagine JPG, PNG sau WebP'
         : undefined
 
   if (!parsed.success || imageError) {
@@ -86,8 +96,8 @@ export async function saveService(_prev: ServiceFormState, formData: FormData): 
     ? await db.service.update({ where: { id }, data: { ...data, categoryId: category } })
     : await db.service.create({ data: { ...data, categoryId: category, slug: await uniqueSlug(data.title) } })
 
-  if (upload) {
-    const image = { data: new Uint8Array(await upload.arrayBuffer()), mimeType: upload.type }
+  if (bytes && mimeType) {
+    const image = { data: bytes, mimeType }
     await db.serviceImage.upsert({ where: { serviceId: service.id }, update: image, create: { serviceId: service.id, ...image } })
   } else if (values.removeImage === 'on') {
     await db.serviceImage.deleteMany({ where: { serviceId: service.id } })

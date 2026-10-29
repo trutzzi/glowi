@@ -27,6 +27,7 @@ export default function ClientLoginPage() {
             Conectare administrator
           </Link>
         </p>
+        <p className="mt-2 text-center text-xs text-gray-400"><Link href="/confidentialitate" className="underline hover:text-gray-700">Confidențialitate</Link></p>
         {/* Discreet on purpose: it's for visitors who want to look around, not for clients. */}
         {demoEnabled() && (
           <form action={startDemo} className="mt-3 text-center">

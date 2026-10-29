@@ -2,7 +2,7 @@ import 'server-only'
 import { cacheLife, cacheTag } from 'next/cache'
 import { db } from '@/lib/db'
 import { requireRole } from '@/app/lib/dal'
-import type { Announcement, SalonInfo, SetupProgress } from '@/app/lib/definitions'
+import type { Announcement, LegalInfo, SalonInfo, SetupProgress } from '@/app/lib/definitions'
 
 export const ANNOUNCEMENT_TAG = 'announcement'
 export const SALON_TAG = 'salon'
@@ -54,4 +54,15 @@ export async function getSalonInfo(): Promise<SalonInfo> {
     name: saved.name || process.env.SALON_NAME || 'Stylish Salon',
     phone: saved.phone ?? (process.env.SALON_PHONE || null),
   }
+}
+
+// The salon's legal details for the privacy notice. Public, cached with the
+// salon info and refreshed by saveLegalInfo(). Empty strings until set.
+export async function getLegalInfo(): Promise<LegalInfo> {
+  'use cache'
+  cacheTag(SALON_TAG)
+  cacheLife('days')
+  const row = await db.setting.findUnique({ where: { key: 'legal' } })
+  const saved = (row?.value ?? {}) as Partial<LegalInfo>
+  return { company: saved.company ?? '', cui: saved.cui ?? '', address: saved.address ?? '', email: saved.email ?? '' }
 }

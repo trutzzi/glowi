@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { LogoutButton } from "@/components/LogoutButton";
-import { AdminProfileForm, OpeningHoursForm, PasswordForm, SalonForm } from "@/components/ProfileForms";
+import Link from "next/link";
+import { AdminProfileForm, LegalForm, OpeningHoursForm, PasswordForm, SalonForm } from "@/components/ProfileForms";
 import { getOpeningHours } from "@/app/lib/availability";
-import { getSalonInfo } from "@/app/lib/settings";
+import { getLegalInfo, getSalonInfo } from "@/app/lib/settings";
 import { requireRole } from "@/app/lib/dal";
 import { getMyProfile } from "@/app/lib/profile";
 
@@ -20,7 +21,7 @@ export default function AdminProfilePage() {
 
 async function AdminProfile() {
   await requireRole("admin");
-  const [profile, salon, hours] = await Promise.all([getMyProfile(), getSalonInfo(), getOpeningHours()]);
+  const [profile, salon, hours, legal] = await Promise.all([getMyProfile(), getSalonInfo(), getOpeningHours(), getLegalInfo()]);
   if (!profile) notFound();
 
   return (
@@ -35,6 +36,18 @@ async function AdminProfile() {
             <OpeningHoursForm hours={hours} />
           </div>
         </div>
+      </section>
+      <section className="rounded-2xl bg-white p-5 shadow-sm md:col-span-2">
+        <h2 className="font-medium text-gray-900">Date legale (GDPR)</h2>
+        <p className="mb-1 text-sm text-gray-500">
+          Apar în{" "}
+          <Link href="/confidentialitate" className="text-primary hover:underline">
+            Nota de informare
+          </Link>{" "}
+          pe care o văd clienții.
+        </p>
+        <p className="mb-4 text-xs text-amber-800">Textul notei este un model. Verificați-l cu un jurist înainte de a vă baza pe el.</p>
+        <LegalForm legal={legal} />
       </section>
       <section className="rounded-2xl bg-white p-5 shadow-sm">
         <h2 className="mb-3 font-medium text-gray-900">Datele tale</h2>

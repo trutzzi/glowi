@@ -163,6 +163,12 @@ sends tomorrow's reminders from 10:00 and maintenance reminders, each once.
 - `SMSLINK_TEST=1` simulates (nothing is delivered).
 - **Remove `SMS_REDIRECT_TO`** before real clients use the app, or their SMS go to that number.
 
+## Clients' data requests (GDPR)
+
+- **Copy of their data:** admin → client page → **Descarcă datele (JSON)**.
+- **Deletion:** admin → client page → **Șterge clientul**. Their appointments, requests and maintenance go with them; the nightly backups still hold them until they age out (`BACKUP_KEEP_DAYS`).
+- **Privacy notice:** fill in Profil → **Date legale** after the first deploy; the notice at `/confidentialitate` uses those details.
+
 ## Backups
 
 A compressed dump is written every night at 03:30 to the `backups` volume and kept

@@ -1,6 +1,7 @@
 'use server'
 
 import { redirect } from 'next/navigation'
+import { localPath } from '@/lib/local-path'
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { requireRole } from '@/app/lib/dal'
@@ -49,5 +50,5 @@ export async function createEvent(_prev: EventFormState, formData: FormData): Pr
 export async function deleteEvent(id: string, back: string) {
   await requireRole('admin')
   await db.calendarEvent.deleteMany({ where: { id } })
-  redirect(back)
+  redirect(localPath(back))
 }

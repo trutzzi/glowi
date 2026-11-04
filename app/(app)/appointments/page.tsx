@@ -7,6 +7,7 @@ import { verifySession } from "@/app/lib/dal";
 import { getMyAppointments } from "@/app/lib/appointments";
 import { getMyLatestRequests } from "@/app/lib/requests";
 import { DEMO_READ_ONLY } from "@/app/lib/demo";
+import { Loading } from "@/components/Loading";
 
 type SearchParams = Promise<{ cerere?: string; mutata?: string; demo?: string }>;
 
@@ -16,7 +17,7 @@ export default function AppointmentsPage({ searchParams }: { searchParams: Searc
   return (
     <>
       <h1 className="text-3xl font-medium text-gray-900">Programările mele</h1>
-      <Suspense fallback={<p className="mt-5 text-gray-500">Se încarcă programările…</p>}>
+      <Suspense fallback={<Loading label="Se încarcă programările…" />}>
         <AppointmentsContent searchParams={searchParams} />
       </Suspense>
     </>

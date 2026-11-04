@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { CategoryManager } from "@/components/CategoryManager";
 import { getCategoriesWithCounts } from "@/app/lib/services";
+import { Loading } from "@/components/Loading";
 
 export default function CategoriesPage() {
   return (
@@ -13,7 +14,7 @@ export default function CategoriesPage() {
         </Link>
       </div>
       <p className="mb-4 text-sm text-gray-500">Ordinea de aici este ordinea în care clienții văd serviciile.</p>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă…</p>}>
+      <Suspense fallback={<Loading />}>
         <Categories />
       </Suspense>
     </>

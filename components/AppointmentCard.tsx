@@ -14,7 +14,7 @@ export function AppointmentCard({ appt, latest }: { appt: MyAppointmentView; lat
         {appt.serviceImageUrl ? (
           <Image src={appt.serviceImageUrl} alt={appt.serviceTitle} width={48} height={48} className="h-12 w-12 rounded-lg object-cover" />
         ) : (
-          <div className="grid h-12 w-12 place-items-center rounded-lg bg-white/60 text-gray-600">
+          <div className="grid h-12 w-12 place-items-center rounded-lg bg-surface/60 text-gray-600">
             <Sparkles className="h-5 w-5" />
           </div>
         )}
@@ -23,7 +23,7 @@ export function AppointmentCard({ appt, latest }: { appt: MyAppointmentView; lat
           {!upcoming && <StatusBadge status={appt.status} />}
         </div>
       </div>
-      <p className="mt-3 border-t border-black/10 pt-3 text-sm text-gray-800">{formatDateTime(new Date(appt.start))}</p>
+      <p className="mt-3 border-t border-gray-900/10 pt-3 text-sm text-gray-800">{formatDateTime(new Date(appt.start))}</p>
       {upcoming && latest !== undefined && <RequestActions appointmentId={appt.id} latest={latest} />}
     </article>
   );

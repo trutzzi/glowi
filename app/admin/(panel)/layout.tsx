@@ -9,8 +9,8 @@ import { AppHeader } from "@/components/AppHeader";
 export default function AdminPanelLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col bg-ivory">
-      <div className="sticky top-0 z-30 border-b border-gray-200 bg-white/90 pt-[env(safe-area-inset-top)] backdrop-blur">
-        <div className="mx-auto flex max-w-5xl flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div className="sticky top-0 z-30 border-b border-gray-200 bg-surface/90 pt-[env(safe-area-inset-top)] backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between">
           <AppHeader href="/admin" subtitle="Admin" />
           <AdminNav />
         </div>

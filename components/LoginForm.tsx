@@ -41,7 +41,7 @@ export function LoginForm({ role, redirectTo, submitLabel }: Props) {
           placeholder={role === "client" ? "07xx xxx xxx" : undefined}
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
-          className="w-full rounded-full bg-white px-5 py-3 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary"
+          className="w-full rounded-full bg-surface px-5 py-3 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary"
         />
       </label>
       <label className="block">
@@ -52,14 +52,14 @@ export function LoginForm({ role, redirectTo, submitLabel }: Props) {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-full bg-white px-5 py-3 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary"
+          className="w-full rounded-full bg-surface px-5 py-3 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary"
         />
       </label>
       {error && <p role="alert" className="text-center text-sm text-red-600">{error}</p>}
       <button
         type="submit"
         disabled={pending}
-        className="w-full disabled:opacity-60 rounded-full bg-primary py-4 text-sm font-semibold tracking-widest text-white shadow-md transition hover:bg-primary-dark"
+        className="w-full disabled:opacity-60 rounded-full bg-primary py-4 text-sm font-semibold tracking-widest text-on-primary shadow-md transition hover:bg-primary-dark"
       >
         {submitLabel}
       </button>

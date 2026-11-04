@@ -8,6 +8,7 @@ import { deleteEvent } from "@/app/actions/calendar";
 import { formatDateTime, salonToUtc, utcToSalon } from "@/lib/time";
 import { addDays, daysOfMonth, isMonth } from "@/lib/dates";
 import type { CalendarEventView } from "@/app/lib/definitions";
+import { Loading } from "@/components/Loading";
 
 type SearchParams = Promise<{ luna?: string }>;
 
@@ -16,7 +17,7 @@ export default function CalendarPage({ searchParams }: { searchParams: SearchPar
     <>
       <h1 className="mb-1 text-3xl text-gray-900">Calendar</h1>
       <p className="mb-5 text-sm text-gray-500">Evenimentele blochează programările, atât pentru tine cât și pentru clienți.</p>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă…</p>}>
+      <Suspense fallback={<Loading />}>
         <CalendarContent searchParams={searchParams} />
       </Suspense>
     </>
@@ -67,7 +68,7 @@ async function CalendarContent({ searchParams }: { searchParams: SearchParams })
           ) : (
             <ul className="space-y-2">
               {upcoming.map((e) => (
-                <li key={e.id} className="flex items-start justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm">
+                <li key={e.id} className="flex items-start justify-between gap-3 rounded-2xl bg-surface p-4 shadow-sm">
                   <div className="min-w-0">
                     <p className="font-medium text-gray-900">{e.title}</p>
                     <p className="text-sm text-gray-500 first-letter:uppercase">{eventWhen(e)}</p>
@@ -85,7 +86,7 @@ async function CalendarContent({ searchParams }: { searchParams: SearchParams })
         </section>
       </div>
 
-      <section className="h-fit rounded-2xl bg-white p-5 shadow-sm">
+      <section className="h-fit rounded-2xl bg-surface p-5 shadow-sm">
         <h2 className="mb-3 font-medium text-gray-900">Eveniment nou</h2>
         <EventForm today={today} />
       </section>

@@ -49,7 +49,7 @@ export default async function WelcomePage() {
 
         <ul className="mt-7 space-y-3">
           {FEATURES.map(({ icon: Icon, title, text }) => (
-            <li key={title} className="flex items-start gap-3 rounded-2xl bg-white/80 p-3 shadow-sm">
+            <li key={title} className="flex items-start gap-3 rounded-2xl bg-surface/80 p-3 shadow-sm">
               <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-soft text-primary">
                 <Icon className="h-4 w-4" aria-hidden />
               </span>
@@ -66,7 +66,7 @@ export default async function WelcomePage() {
         <div className="mt-auto pt-8">
           <Link
             href="/login"
-            className="block rounded-full bg-primary py-4 text-center text-sm font-semibold tracking-widest text-white shadow-md transition hover:bg-primary-dark"
+            className="block rounded-full bg-primary py-4 text-center text-sm font-semibold tracking-widest text-on-primary shadow-md transition hover:bg-primary-dark"
           >
             CONECTEAZĂ-TE
           </Link>

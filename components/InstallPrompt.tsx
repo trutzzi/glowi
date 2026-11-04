@@ -59,7 +59,7 @@ export function InstallPrompt({ className = "" }: { className?: string }) {
   };
 
   return (
-    <aside className={`relative flex items-start gap-3 rounded-2xl bg-white p-4 pr-10 shadow-sm ring-1 ring-primary-soft ${className}`}>
+    <aside className={`relative flex items-start gap-3 rounded-2xl bg-surface p-4 pr-10 shadow-sm ring-1 ring-primary-soft ${className}`}>
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary">
         <Download className="h-5 w-5" aria-hidden />
       </span>
@@ -78,7 +78,7 @@ export function InstallPrompt({ className = "" }: { className?: string }) {
                 await installEvent!.prompt();
                 if ((await installEvent!.userChoice).outcome === "accepted") setClosed(true);
               }}
-              className="mt-2 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-dark"
+              className="mt-2 rounded-full bg-primary px-4 py-1.5 text-sm font-medium text-on-primary hover:bg-primary-dark"
             >
               Instalează
             </button>

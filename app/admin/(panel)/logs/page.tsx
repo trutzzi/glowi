@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { requireRole } from "@/app/lib/dal";
 import { clearLogs } from "@/app/actions/logs";
 import { SALON_TZ } from "@/lib/time";
+import { Loading } from "@/components/Loading";
 
 const SOURCE_LABELS: Record<string, string> = { server: "Server", client: "Browser", sms: "SMS" };
 
@@ -11,7 +12,7 @@ export default function LogsPage() {
     <>
       <h1 className="mb-1 text-3xl text-gray-900">Jurnal erori</h1>
       <p className="mb-4 text-sm text-gray-500">Ultimele 200 de erori din ultimele 30 de zile. Vizibil doar pentru administrator.</p>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă…</p>}>
+      <Suspense fallback={<Loading />}>
         <Logs />
       </Suspense>
     </>
@@ -24,7 +25,7 @@ async function Logs() {
   const time = (d: Date) =>
     new Intl.DateTimeFormat("ro-RO", { timeZone: SALON_TZ, dateStyle: "short", timeStyle: "medium" }).format(d);
 
-  if (logs.length === 0) return <p className="rounded-2xl bg-white p-6 text-center text-sm text-gray-500 shadow-sm">Nicio eroare înregistrată.</p>;
+  if (logs.length === 0) return <p className="rounded-2xl bg-surface p-6 text-center text-sm text-gray-500 shadow-sm">Nicio eroare înregistrată.</p>;
 
   return (
     <div className="space-y-3">
@@ -33,7 +34,7 @@ async function Logs() {
       </form>
       <ul className="space-y-2">
         {logs.map((log) => (
-          <li key={log.id} className="rounded-2xl bg-white p-4 shadow-sm">
+          <li key={log.id} className="rounded-2xl bg-surface p-4 shadow-sm">
             <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
               <span className={`rounded-full px-2 py-0.5 font-medium ${log.level === "error" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"}`}>
                 {log.level === "error" ? "Eroare" : "Avertisment"}

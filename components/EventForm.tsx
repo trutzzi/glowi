@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createEvent } from "@/app/actions/calendar";
 import type { EventFormState } from "@/app/lib/definitions";
 
-const input = "w-full rounded-xl bg-white px-3 py-2 text-sm text-gray-800 shadow-sm ring-1 ring-gray-200 outline-none focus:ring-2 focus:ring-primary";
+const input = "w-full rounded-xl bg-surface px-3 py-2 text-sm text-gray-800 shadow-sm ring-1 ring-gray-200 outline-none focus:ring-2 focus:ring-primary";
 
 const when = (iso: string) =>
   new Intl.DateTimeFormat("ro-RO", { timeZone: "Europe/Bucharest", weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
@@ -75,7 +75,7 @@ export function EventForm({ today }: { today: string }) {
         <input name="notes" maxLength={300} className={input} />
       </label>
 
-      <button disabled={pending} className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-60">
+      <button disabled={pending} className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-on-primary hover:bg-primary-dark disabled:opacity-60">
         {pending ? "Se salvează…" : "Adaugă evenimentul"}
       </button>
 

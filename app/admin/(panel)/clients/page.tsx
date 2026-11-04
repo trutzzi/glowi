@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Plus, Search } from "lucide-react";
 import { getClients } from "@/app/lib/clients";
 import { getClientIdsWithMaintenance } from "@/app/lib/maintenance";
+import { Loading } from "@/components/Loading";
 
 type SearchParams = Promise<{ q?: string; filtru?: string; sters?: string }>;
 
@@ -14,12 +15,12 @@ export default function AdminClientsPage({ searchParams }: { searchParams: Searc
         <h1 className="text-3xl font-medium text-gray-900">Clienți</h1>
         <Link
           href="/admin/clients/new"
-          className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+          className="flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-dark"
         >
           <Plus className="h-4 w-4" /> Adaugă
         </Link>
       </div>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă clienții…</p>}>
+      <Suspense fallback={<Loading label="Se încarcă clienții…" />}>
         <ClientList searchParams={searchParams} />
       </Suspense>
     </>
@@ -64,7 +65,7 @@ async function ClientList({ searchParams }: { searchParams: SearchParams }) {
         <ul className="grid gap-2 md:grid-cols-2">
           {clients.map((c) => (
             <li key={c.id}>
-              <Link href={`/admin/clients/${c.id}`} className="block rounded-2xl bg-white p-4 shadow-sm transition hover:shadow-md">
+              <Link href={`/admin/clients/${c.id}`} className="block rounded-2xl bg-surface p-4 shadow-sm transition hover:shadow-md">
                 <p className="flex items-center gap-2 font-medium text-gray-900">
                   {c.name}
                   {withMaintenance.has(c.id) && (

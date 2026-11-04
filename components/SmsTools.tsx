@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { runRemindersNow, sendTestSms, type SmsToolState } from "@/app/actions/sms";
 
 const input =
-  "w-full rounded-xl bg-white px-4 py-2.5 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary";
+  "w-full rounded-xl bg-surface px-4 py-2.5 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary";
 
 function Result({ state }: { state: SmsToolState }) {
   if (!state.message) return null;
@@ -16,7 +16,7 @@ export function SmsTools({ redirectTo }: { redirectTo: string | null }) {
   const [runState, runAction, runPending] = useActionState<SmsToolState>(runRemindersNow, {});
 
   return (
-    <section className="space-y-4 rounded-2xl bg-white p-4 shadow-sm">
+    <section className="space-y-4 rounded-2xl bg-surface p-4 shadow-sm">
       <h2 className="font-medium text-gray-900">Remindere SMS</h2>
       {redirectTo && (
         <p className="rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-900">
@@ -28,7 +28,7 @@ export function SmsTools({ redirectTo }: { redirectTo: string | null }) {
       <form action={runAction}>
         <button
           disabled={runPending}
-          className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-60"
+          className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-dark disabled:opacity-60"
         >
           {runPending ? "Se trimite…" : "Trimite acum: remindere pentru mâine și întreținere"}
         </button>
@@ -43,7 +43,7 @@ export function SmsTools({ redirectTo }: { redirectTo: string | null }) {
           <input id="test-phone" name="phone" type="tel" required placeholder="07xx xxx xxx" className={input} />
           <button
             disabled={testPending}
-            className="shrink-0 rounded-xl bg-primary-soft px-4 text-sm text-gray-700 hover:bg-primary hover:text-white disabled:opacity-60"
+            className="shrink-0 rounded-xl bg-primary-soft px-4 text-sm text-gray-700 hover:bg-primary hover:text-on-primary disabled:opacity-60"
           >
             {testPending ? "…" : "Trimite"}
           </button>

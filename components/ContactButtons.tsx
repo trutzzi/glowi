@@ -13,7 +13,7 @@ export function ContactButtons({ phone, message, className = "" }: { phone: stri
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
       {tel && (
-        <a href={tel} className={`${button} bg-primary-soft text-primary-dark hover:bg-primary hover:text-white`}>
+        <a href={tel} className={`${button} bg-primary-soft text-primary-dark hover:bg-primary hover:text-on-primary`}>
           <Phone className="h-4 w-4" /> Sună · {phone}
         </a>
       )}

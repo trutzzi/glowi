@@ -10,7 +10,7 @@ type Initial = { id?: string; clientId?: string; serviceId?: string; date?: stri
 type Props = BookingOptions & { initial?: Initial; currentServiceTitle?: string };
 
 const input =
-  "w-full rounded-xl bg-white px-4 py-2.5 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary";
+  "w-full rounded-xl bg-surface px-4 py-2.5 text-sm text-gray-800 shadow-sm outline-none focus:ring-2 focus:ring-primary";
 
 export function AppointmentForm({ clients, services, initial = {}, currentServiceTitle }: Props) {
   const [state, formAction, pending] = useActionState<AppointmentFormState, FormData>(saveAppointment, {});
@@ -87,7 +87,7 @@ export function AppointmentForm({ clients, services, initial = {}, currentServic
         <button
           type="submit"
           disabled={pending}
-          className="flex-1 rounded-full bg-primary py-3 text-sm font-semibold tracking-widest text-white shadow-md transition hover:bg-primary-dark disabled:opacity-60"
+          className="flex-1 rounded-full bg-primary py-3 text-sm font-semibold tracking-widest text-on-primary shadow-md transition hover:bg-primary-dark disabled:opacity-60"
         >
           {pending ? "SE SALVEAZĂ…" : initial.id ? "SALVEAZĂ" : "PROGRAMEAZĂ"}
         </button>

@@ -72,3 +72,31 @@ export async function sendSms(phone: string, text: string): Promise<SmsResult> {
   if (kind === 'MESSAGE') return { ok: true, messageId: variables.split(',')[0] || null, test }
   return { ok: false, error: kind === 'ERROR' ? `Eroare SMSLink ${code}: ${description}` : `Răspuns neașteptat (HTTP ${response.status}): ${reply.slice(0, 200)}` }
 }
+
+export type SmsCredit = { ok: true; credit: number } | { ok: false; error: string }
+
+// SMS left in the SMSLink account (a number of messages, not money). Uses their
+// JSON endpoint, which has the credit check the plain-text one lacks; it only
+// reads the credentials from a JSON body (a form body is "insufficient arguments").
+export async function getSmsCredit(): Promise<SmsCredit> {
+  const connectionId = process.env.SMSLINK_CONNECTION_ID
+  const password = process.env.SMSLINK_PASSWORD
+  if (!connectionId || !password) return { ok: false, error: 'SMSLINK_CONNECTION_ID / SMSLINK_PASSWORD lipsesc din .env' }
+
+  let reply: { response_type?: string; response_message?: string; credit?: string | number }
+  try {
+    const response = await fetch('https://secure.smslink.ro/sms/gateway/communicate/json.php?mode=Credit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ connection_id: connectionId, password }),
+      signal: AbortSignal.timeout(10_000),
+    })
+    reply = await response.json()
+  } catch (error) {
+    return { ok: false, error: `SMSLink nu poate fi contactat: ${String(error)}` }
+  }
+
+  const credit = Number(reply.credit)
+  if (reply.response_type === 'MESSAGE' && Number.isFinite(credit)) return { ok: true, credit }
+  return { ok: false, error: `Eroare SMSLink: ${reply.response_message ?? 'răspuns neașteptat'}` }
+}

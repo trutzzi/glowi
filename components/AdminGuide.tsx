@@ -54,7 +54,7 @@ export function AdminGuide({ progress }: { progress: SetupProgress }) {
   const done = steps.filter((s) => s.done).length;
 
   return (
-    <section className="rounded-2xl bg-white p-5 shadow-sm" aria-labelledby="guide-title">
+    <section className="rounded-2xl bg-surface p-5 shadow-sm" aria-labelledby="guide-title">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 id="guide-title" className="font-display text-xl text-gray-900">
@@ -77,7 +77,7 @@ export function AdminGuide({ progress }: { progress: SetupProgress }) {
         {steps.map((s, i) => (
           <li key={s.title} className={`flex gap-3 rounded-xl p-3 ${s.done ? "bg-gray-50" : "bg-primary-soft/60"}`}>
             <span
-              className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-sm font-medium ${s.done ? "bg-green-100 text-green-700" : "bg-white text-primary-dark"}`}
+              className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-sm font-medium ${s.done ? "bg-green-100 text-green-700" : "bg-surface text-primary-dark"}`}
               aria-label={s.done ? "Gata" : `Pasul ${i + 1}`}
             >
               {s.done ? <Check className="h-4 w-4" /> : i + 1}

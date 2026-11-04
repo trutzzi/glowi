@@ -13,6 +13,7 @@ import { setAppointmentStatus } from "@/app/actions/appointments";
 import { formatDateTime, formatTime, utcToSalon } from "@/lib/time";
 import { ContactButtons } from "@/components/ContactButtons";
 import { STATUS_LABELS, type AppointmentStatus, type AppointmentView } from "@/app/lib/definitions";
+import { Loading } from "@/components/Loading";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -32,7 +33,7 @@ export default function AppointmentPage({ params, searchParams }: Props) {
   return (
     <>
       <h1 className="mb-4 text-3xl font-medium text-gray-900">Programare</h1>
-      <Suspense fallback={<p className="text-gray-500">Se încarcă…</p>}>
+      <Suspense fallback={<Loading />}>
         <AppointmentDetails params={params} searchParams={searchParams} />
       </Suspense>
     </>
@@ -67,7 +68,7 @@ async function AppointmentDetails({ params, searchParams }: Props) {
         </p>
       )}
 
-      <section className="rounded-2xl bg-white p-4 shadow-sm">
+      <section className="rounded-2xl bg-surface p-4 shadow-sm">
         <div className="flex items-start justify-between gap-2">
           <div>
             <Link href={`/admin/clients/${appt.clientId}`} className="font-medium text-primary hover:underline">

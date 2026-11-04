@@ -21,7 +21,7 @@ export function ErrorScreen({ error, retry }: { error: Error & { digest?: string
       </p>
       {error.digest && <p className="mt-2 text-xs text-gray-400">Cod: {error.digest}</p>}
       <div className="mt-6 flex gap-3">
-        <button onClick={() => retry()} className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white hover:bg-primary-dark">
+        <button onClick={() => retry()} className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-on-primary hover:bg-primary-dark">
           Încearcă din nou
         </button>
         <Link href="/" className="rounded-full px-6 py-3 text-sm text-gray-600 hover:bg-gray-100">
